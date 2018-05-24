@@ -1,5 +1,9 @@
 type hash_string = string
 
+(******************************************************************************)
+(** {2 Native Functions} *)
+(******************************************************************************)
+
 (** Returns an application property, which are defined by the app developer. It returns externalues from the DNA file that you set as properties of your application (e.g. Name, Language, Description, Author, etc.). *)
 external property : string -> string (*or_error *) = "property" [@@bs.val]
 
@@ -98,7 +102,132 @@ external remove : entry:'obj Js.t -> message:string -> hash_string =
 external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
   'string_or_obj Js.t = "update"
 
+(**
+ * Keep in mind that you will want to retrieve most data from the DHT (shared data space), so that you are seeing what the rest of the nodes on your Holochain are seeing. However, there are times you will want to query private data fields, or package up data from your source chain for sending. In those cases you can use this function. query returns a list whose contents depend on what was chosen in the Returns option. If a single option was chosen, then it will be a bare list consisting of that item type. If more than than one return option was chosen, then it will be a list of items whose key will be the singular name of that option, i.e. Hash, Entry, or Header. See the examples below for reference.
+
+options: object
+options.Return: object
+options.Return.Hashes: boolean
+options.Return.Entries: boolean (default: true)
+options.Return.Hashes: boolean
+options.Constrain: object
+options.Constrain.EntryTypes: array-of-string
+options.Constrain.Contains: string
+options.Constrain.Equals: string
+options.Constrain.Matches: regex
+options.Constrain.Count: int
+options.Constrain.Page: int
+options.Order.Ascending: boolean (default: false)
+options.Bundle: boolean
+Returns: array-of-Query-object OR error
+settings
+expand_less JS examples
+// Here is an example of choosing a single Return option:
+var result = query({
+  Return: {
+    Hashes: true
+  },
+  Constrain: {
+    EntryTypes: ["posts"]
+  }
+})
+debug(result)
+/*
+[
+  "QmSwMfay3iCynzBFeq9rPzTMTnnuQSMUSe84whjcC9JPAo",
+  "QmfMPAEdN1BB9imcz97NsaYYaWEN3baC5aSDXqJSiWt4e6"
+]
+*/
+
+// Here is an example of choosing multiple Return options:
+var result = query({
+  Return: {
+    Hashes: true,
+    Entries: true
+  },
+  Constrain: {
+    EntryTypes: ["posts"],
+    Count:1
+  }
+})
+debug(result)
+/*
+[
+  {
+    "Entry": {"message":"this is my test post"},
+    "Hash": "QmSwMfay3iCynzBFeq9rPzTMTnnuQSMUSe84whjcC9JPAo"
+  }
+]
+*/
+**)
+external query :
+  options:'obj Js.t -> 'query_obj Js.t (* or error *) list =
+  "query" [@@bs.val]
+
+(** Commits a new agent entry to the chain, with either or both new identity information or a new public key, while revoking the old key. If revoking a key, also adds that key to the node blockedlist (which is also gossiped), as it's no longer a valid peer address.
+
+options: object
+options.Revocation: Revocation-Data-string
+options.Identity: Identity-Info-string
+Returns: hash-string OR error
+settings
+expand_less JS example
+updateAgent({Identity:"newemail@example.com",Revocation:"sample revocation reason"})
+*)
 external update_agent :
   options: 'obj Js.t -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
 
 
+(** Sends a message to a node, using the App.Key.Hash of that node, its permanent address in the DHT. The return value of this function will be whatever is returned by the receive function on the receiving node. Alternatively, you can indicate that this call should be made asynchronously, and specify the callback function using these properties:
+
+options.Callback.Function: the name of a function to call back when the call completes or times out.
+
+options.Callback.ID: an id that will be passed to your callback function to identify the particular call
+
+to: hash-string (see App.Key.Hash)
+message: object
+options: object
+options.Callback: object (optional)
+options.Callback.Function: string
+options.Callback.ID: string
+Returns: any-type
+*)
+external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
+  'any_type Js.t = "send" [@@bs.val]
+
+
+
+(******************************************************************************)
+(** {2 Optional callbacks} *)
+(******************************************************************************)
+
+
+(** This function gets called by the system when a message is received by a node. The return value of the function will be sent back to the sender and will be the result of the send function that sent the message. The value you return from this function will be sent back to the node that sent you the message. *)
+external receive : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
+  'any_type Js.t = "receive" [@@bs.val]
+
+(******************************************************************************)
+(** {2 Required callbacks} *)
+(******************************************************************************)
+
+module Callback = struct
+module type REQUIRED = sig
+
+
+
+(** Each zome must include this function, which is called during system genesis. It executes just after the initial genesis entries are committed to your chain (1st - DNA entry, 2nd Identity entry). It enables you specify any additional operations you want performed when a node joins your holochain, for example, you may want to add some user/address/key information to the DHT to announce the presence of this new node. This function must return true if it is to succeed, and the application to start successfully. *)
+val genesis : unit -> bool
+
+
+(** This function gets called when an entry is about to be committed to a source chain. Use this function to describe the agreements about data as it should be added to shared Holochain. This function gets called for all entry types. For more background, read the Validation Functions section. *)
+  val validateCommit : entry_type:'obj Js.t -> entry:'any_type Js.t ->
+    package:'package_obj Js.t -> sources:string array -> bool
+end
+
+
+module type OPTIONAL = sig
+(** All zomes which expose functions for bridging from other applications MUST also define a bridgeGenesis function (i.e. the "Bridge-To" side). Zomes which want to call functions in other applications MAY define a bridgeGenesis function and declare that they do so by setting the Zome.BridgeTo value in their DNA. *)
+  val bridgeGenesis : side:[`From|`To] -> dna:hash_string ->
+    app_data:string -> bool
+end
+end

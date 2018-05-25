@@ -1,0 +1,5 @@
+
+dev:
+	bsb
+
+default:dev

@@ -29,10 +29,10 @@ external verify_signature :
 
 (** Attempts to commit an entry to your local source chain. It will cause callbac to your validaneCommitfunction. Returns either an error or the hash of the committed entry upon success. The type of the entryData parameter depends on the entry format of entry. If it's a string entry format then the type must be string. If it's a JSON entry format, then it can by any type, and the value will get appropriately converted to JSON. If it is a links format entry, then the type must by a JSON object.
 
-A linksentry object looks like this
+    A linksentry object looks like this
 
-{ Links: [ { Base: "2bDja...", Link: "Fb4aXa...", Tag: "links to" } ] }
-Base and Linkmust both be type hash. Tagcan be any string, describing the relationship between Base and Link. Tagwill later be used in getLinks. It may optionally contain a 4th property LinkActionwhich should be set to HC.LinkAction.Delin order to mark the link as deleted. See the examples below.
+    { Links: [ { Base: "2bDja...", Link: "Fb4aXa...", Tag: "links to" } ] }
+    Base and Linkmust both be type hash. Tagcan be any string, describing the relationship between Base and Link. Tagwill later be used in getLinks. It may optionally contain a 4th property LinkActionwhich should be set to HC.LinkAction.Delin order to mark the link as deleted. See the examples below.
 *)
 external commit :
   entry_type:string ->
@@ -69,26 +69,26 @@ external get_bridges :
 (**
  *This function retrieves an entry from the local chain or the DHT. If options.StatusMask is present, it determines which entries to return, depending on their status. If options.GetMask is present, this option allows you to specify what information about the entry you want. For more on that, see Entry Objects and Masks.
 
-If options.Local is set to true, it indicates that the get refers to the local chain only. This allows you to retrieve specific entries from your chain, which includes private entries that aren't published to the DHT.
+   If options.Local is set to true, it indicates that the get refers to the local chain only. This allows you to retrieve specific entries from your chain, which includes private entries that aren't published to the DHT.
 
-If options.Bundle is set to true, it indicates that the get refers to the currently started bundle only. If no bundle has been started, returns an error.
+   If options.Bundle is set to true, it indicates that the get refers to the currently started bundle only. If no bundle has been started, returns an error.
 
-If only StatusMask value specified or only Entry is specified the return value will be the actual entry value. Otherwise the return value will be an object with properties of the same name as the mask name.
+   If only StatusMask value specified or only Entry is specified the return value will be the actual entry value. Otherwise the return value will be an object with properties of the same name as the mask name.
 
-hash: hash-string
-options: object (optional)
-options.StatusMask: Status-int
-options.GetMask: Mask-int
-options.Local: boolean
-options.Bundle: boolean
-Returns: Entry-object OR HC.HashNotFound
+   hash: hash-string
+   options: object (optional)
+   options.StatusMask: Status-int
+   options.GetMask: Mask-int
+   options.Local: boolean
+   options.Bundle: boolean
+   Returns: Entry-object OR HC.HashNotFound
 *)
 external get :
   hash_string -> options:'a Js.t -> 'entry Js.t =
   "get" [@@bs.val]
 
 
-(**Retrieves a list of links tagged as tag on base from the DHT. If tag is an empty string it will return all the links on the baseand the list will also include the Tag property on entries. With options as {Load: false} (which is the default) returns a list of the form [{Hash:"QmY..."},..] With options as {Load: true} it will get the entry values of the links and return a list of the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only links with a certain status. Default is to return only Live links. You can use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
+(** Retrieves a list of links tagged as tag on base from the DHT. If tag is an empty string it will return all the links on the baseand the list will also include the Tag property on entries. With options as {Load: false} (which is the default) returns a list of the form [{Hash:"QmY..."},..] With options as {Load: true} it will get the entry values of the links and return a list of the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only links with a certain status. Default is to return only Live links. You can use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
 
 external get_links  :
   base:hash_string -> tag:string -> options:'a Js.t -> 'entry Js.t array =
@@ -105,74 +105,74 @@ external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
 (**
  * Keep in mind that you will want to retrieve most data from the DHT (shared data space), so that you are seeing what the rest of the nodes on your Holochain are seeing. However, there are times you will want to query private data fields, or package up data from your source chain for sending. In those cases you can use this function. query returns a list whose contents depend on what was chosen in the Returns option. If a single option was chosen, then it will be a bare list consisting of that item type. If more than than one return option was chosen, then it will be a list of items whose key will be the singular name of that option, i.e. Hash, Entry, or Header. See the examples below for reference.
 
-options: object
-options.Return: object
-options.Return.Hashes: boolean
-options.Return.Entries: boolean (default: true)
-options.Return.Hashes: boolean
-options.Constrain: object
-options.Constrain.EntryTypes: array-of-string
-options.Constrain.Contains: string
-options.Constrain.Equals: string
-options.Constrain.Matches: regex
-options.Constrain.Count: int
-options.Constrain.Page: int
-options.Order.Ascending: boolean (default: false)
-options.Bundle: boolean
-Returns: array-of-Query-object OR error
-settings
-expand_less JS examples
-// Here is an example of choosing a single Return option:
-var result = query({
-  Return: {
+   options: object
+   options.Return: object
+   options.Return.Hashes: boolean
+   options.Return.Entries: boolean (default: true)
+   options.Return.Hashes: boolean
+   options.Constrain: object
+   options.Constrain.EntryTypes: array-of-string
+   options.Constrain.Contains: string
+   options.Constrain.Equals: string
+   options.Constrain.Matches: regex
+   options.Constrain.Count: int
+   options.Constrain.Page: int
+   options.Order.Ascending: boolean (default: false)
+   options.Bundle: boolean
+   Returns: array-of-Query-object OR error
+   settings
+   expand_less JS examples
+   // Here is an example of choosing a single Return option:
+   var result = query({
+   Return: {
     Hashes: true
-  },
-  Constrain: {
+   },
+   Constrain: {
     EntryTypes: ["posts"]
-  }
-})
-debug(result)
-/*
-[
-  "QmSwMfay3iCynzBFeq9rPzTMTnnuQSMUSe84whjcC9JPAo",
-  "QmfMPAEdN1BB9imcz97NsaYYaWEN3baC5aSDXqJSiWt4e6"
-]
-*/
+   }
+   })
+   debug(result)
+   /*
+   [
+   "QmSwMfay3iCynzBFeq9rPzTMTnnuQSMUSe84whjcC9JPAo",
+   "QmfMPAEdN1BB9imcz97NsaYYaWEN3baC5aSDXqJSiWt4e6"
+   ]
+ */
 
-// Here is an example of choosing multiple Return options:
-var result = query({
-  Return: {
+   // Here is an example of choosing multiple Return options:
+   var result = query({
+   Return: {
     Hashes: true,
     Entries: true
-  },
-  Constrain: {
+   },
+   Constrain: {
     EntryTypes: ["posts"],
     Count:1
-  }
-})
-debug(result)
-/*
-[
-  {
+   }
+   })
+   debug(result)
+   /*
+   [
+   {
     "Entry": {"message":"this is my test post"},
     "Hash": "QmSwMfay3iCynzBFeq9rPzTMTnnuQSMUSe84whjcC9JPAo"
-  }
-]
-*/
-**)
+   }
+   ]
+ */
+ **)
 external query :
   options:'obj Js.t -> 'query_obj Js.t (* or error *) list =
   "query" [@@bs.val]
 
 (** Commits a new agent entry to the chain, with either or both new identity information or a new public key, while revoking the old key. If revoking a key, also adds that key to the node blockedlist (which is also gossiped), as it's no longer a valid peer address.
 
-options: object
-options.Revocation: Revocation-Data-string
-options.Identity: Identity-Info-string
-Returns: hash-string OR error
-settings
-expand_less JS example
-updateAgent({Identity:"newemail@example.com",Revocation:"sample revocation reason"})
+    options: object
+    options.Revocation: Revocation-Data-string
+    options.Identity: Identity-Info-string
+    Returns: hash-string OR error
+    settings
+    expand_less JS example
+    updateAgent({Identity:"newemail@example.com",Revocation:"sample revocation reason"})
 *)
 external update_agent :
   options: 'obj Js.t -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
@@ -180,17 +180,17 @@ external update_agent :
 
 (** Sends a message to a node, using the App.Key.Hash of that node, its permanent address in the DHT. The return value of this function will be whatever is returned by the receive function on the receiving node. Alternatively, you can indicate that this call should be made asynchronously, and specify the callback function using these properties:
 
-options.Callback.Function: the name of a function to call back when the call completes or times out.
+    options.Callback.Function: the name of a function to call back when the call completes or times out.
 
-options.Callback.ID: an id that will be passed to your callback function to identify the particular call
+    options.Callback.ID: an id that will be passed to your callback function to identify the particular call
 
-to: hash-string (see App.Key.Hash)
-message: object
-options: object
-options.Callback: object (optional)
-options.Callback.Function: string
-options.Callback.ID: string
-Returns: any-type
+    to: hash-string (see App.Key.Hash)
+    message: object
+    options: object
+    options.Callback: object (optional)
+    options.Callback.Function: string
+    options.Callback.ID: string
+    Returns: any-type
 *)
 external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
   'any_type Js.t = "send" [@@bs.val]
@@ -200,84 +200,3 @@ external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
 (** {2 Required callbacks} *)
 (******************************************************************************)
 
-module Callback = struct
-module type REQUIRED = sig
-
-
-
-(** Each zome must include this function, which is called during system genesis. It executes just after the initial genesis entries are committed to your chain (1st - DNA entry, 2nd Identity entry). It enables you specify any additional operations you want performed when a node joins your holochain, for example, you may want to add some user/address/key information to the DHT to announce the presence of this new node. This function must return true if it is to succeed, and the application to start successfully. *)
-val genesis : unit -> bool
-
-
-(** This function gets called when an entry is about to be committed to a source chain. Use this function to describe the agreements about data as it should be added to shared Holochain. This function gets called for all entry types. For more background, read the Validation Functions section. *)
-  val validateCommit : entry_type:'obj Js.t -> entry:'any_type Js.t ->
-    package:'package_obj Js.t -> sources:string array -> bool
-
-(** This function gets called when an entry is about to be committed to the DHT on any node. It is very likely that this validation routine should check the same data integrity as validateCommit, but, as it happens during a different part of the data life-cycle, it may require additional validation steps. This function will only get called on entry types with "public" sharing, as they are the only types that get put to the DHT by the system. For more background, read the Validation Functions section. *)
-val validatePut :
-  entry_type:string ->
-  entry:'any_type Js.t ->
-  header:'header_obj Js.t ->
-  package:'package_obj Js.t ->
-  sources:string array -> bool
-
-(** This function gets called as a consequence of a mod command being issued.
-    replaces is the hash of the entry being replaced. For more background,
-    read the Validation Functions section.
-*)
-val validateMod :
-  entry_type:string (* enum? *) ->
-  entry:'any_type Js.t ->
-  header:'header_obj Js.t ->
-  replaces:hash_string ->
-  package:'package_obj Js.t ->
-  sources:string array -> bool
-
-(** This function gets called as a consequence of a del command being issued. For more background, read the Validation Functions section. *)
-val validateDel :
-  entry_type:string (* enum? *) ->
-  hash:hash_string ->
-  package:'package_obj Js.t ->
-  sources:string array -> bool
-
-
-
-(** This function gets called when ever links are being written to the DHT. Links are added for every linking element in the special "links" entry type. Note that this is a DHT level validation routine, in that it gets called when the Link message is received by a DHT node, not when the linking entry is committed. The regular validateCommit routine gets called as usual when that linking entry is committed to the source chain. For more background, read the Validation Functions section. *)
-val validateLink:
-  entry_type:string (* enum? *) ->
-  hash:hash_string ->
-  links:'link_object Js.t array ->
-  package:'package_obj Js.t ->
-  sources:string array -> bool
-
-(** This function should simply return nil if the data required by its corresponding validation function is just the minimum default of the Entry and Header of the action. Otherwise this function must return a "Package Request" object, which specifies what data to be sent to the validating node. For more background, read the Validation Packaging section.
-
-Note that a commit action will trigger a call to validatePutPkg locally when committing happens as validateCommit must have the same data available to it as does validatePut. *)
-val validatePutPkg : entry_type:string -> 'pkg_req_obj Js.t (* or nil *)
-
-(** This function should simply return nil if the data required by its corresponding validation function is just the minimum default of the Entry and Header of the action. Otherwise this function must return a "Package Request" object, which specifies what data to be sent to the validating node. For more background, read the Validation Packaging section. *)
-val validateModPkg :
-  entry_type:string -> 'pkg_req_obj Js.t (* or nil *)
-
-(** This function should simply return nil if the data required by its corresponding validation function is just the minimum default of the Entry and Header of the action. Otherwise this function must return a "Package Request" object, which specifies what data to be sent to the validating node. For more background, read the Validation Packaging section. *)
-val validateDelPkg:
-  entry_type:string -> 'pkg_req_obj Js.t (* or nil *)
-
-(** This function should simply return nil if the data required by its corresponding validation function is just the minimum default of the Entry and Header of the action. Otherwise this function must return a "Package Request" object, which specifies what data to be sent to the validating node. For more background, read the Validation Packaging section. *)
-val validateLinkPkg:
-  entry_type:string -> 'pkg_req_obj Js.t (* or nil *)
-
-end
-
-
-(** Optional callbacks *)
-module type OPTIONAL = sig
-(** All zomes which expose functions for bridging from other applications MUST also define a bridgeGenesis function (i.e. the "Bridge-To" side). Zomes which want to call functions in other applications MAY define a bridgeGenesis function and declare that they do so by setting the Zome.BridgeTo value in their DNA. *)
-  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:hash_string ->
-    app_data:string -> bool
-
-(** This function gets called by the system when a message is received by a node. The return value of the function will be sent back to the sender and will be the result of the send function that sent the message. The value you return from this function will be sent back to the node that sent you the message. *)
-val receive : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
-  'any_type Js.t
-end
-end

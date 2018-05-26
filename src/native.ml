@@ -192,4 +192,3 @@ external update_agent :
 *)
 external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
   'any_type Js.t = "send" [@@bs.val]
-

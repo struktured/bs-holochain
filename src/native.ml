@@ -1,9 +1,7 @@
 type hash_string = string
-
 (******************************************************************************)
 (** {2 Native Functions} *)
 (******************************************************************************)
-
 (** Returns an application property, which are defined by the app developer. It returns externalues from the DNA file that you set as properties of your application (e.g. Name, Language, Description, Author, etc.). *)
 external property : string -> string (*or_error *) = "property" [@@bs.val]
 
@@ -194,9 +192,4 @@ external update_agent :
 *)
 external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
   'any_type Js.t = "send" [@@bs.val]
-
-
-(******************************************************************************)
-(** {2 Required callbacks} *)
-(******************************************************************************)
 

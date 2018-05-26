@@ -6,12 +6,18 @@
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stuktured/bs-holochain.git"
+  },
   "keywords": [
     "BuckleScript"
   ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^2.2.3"
+    "bs-platform": "^3.0.0",
+  },
+  "dependencies": {
   }
 }

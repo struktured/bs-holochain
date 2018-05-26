@@ -1,5 +1,5 @@
 (** {2} Holochain system constants *)
-type hash_string = string
+open Types
 
 module HC = struct
   external version :

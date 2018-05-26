@@ -1,4 +1,4 @@
-type hash_string = string
+open Types
 (******************************************************************************)
 (** {2 Native Functions} *)
 (******************************************************************************)
@@ -53,7 +53,7 @@ external bridge :
 
 (** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
     is [`To], [token] is non empty. *)
-class type bridge =
+class type bridge' =
   object
     method toApp : hash_string [@@bs.set]
     method side:[`From | `To] [@@bs.set]
@@ -62,7 +62,7 @@ class type bridge =
 
 (**This function allows your app to examine which bridges have been put in place. *)
 external get_bridges :
-  unit -> bridge array = "getBridges" [@@bs.val]
+  unit -> bridge' array = "getBridges" [@@bs.val]
 
 (**
  *This function retrieves an entry from the local chain or the DHT. If options.StatusMask is present, it determines which entries to return, depending on their status. If options.GetMask is present, this option allows you to specify what information about the entry you want. For more on that, see Entry Objects and Masks.

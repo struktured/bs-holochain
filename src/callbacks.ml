@@ -1,4 +1,4 @@
-type hash_string = string
+open Types
 module type REQUIRED = sig
 
     (** Each zome must include this function, which is called during system genesis. It executes just after the initial genesis entries are committed to your chain (1st - DNA entry, 2nd Identity entry). It enables you specify any additional operations you want performed when a node joins your holochain, for example, you may want to add some user/address/key information to the DHT to announce the presence of this new node. This function must return true if it is to succeed, and the application to start successfully. *)

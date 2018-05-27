@@ -5,16 +5,24 @@ open Types
 (** Returns an application property, which are defined by the app developer. It returns externalues from the DNA file that you set as properties of your application (e.g. Name, Language, Description, Author, etc.). *)
 external property : string -> string (*or_error *) = "property" [@@bs.val]
 
+let property = property
+
 (** Use e this function to make a hash of the given entry data. This is the same hash externalue that would be returned if entryData were passed to commit and by which an entry of this type would be retrievable from the DHT using get. The type of the entryData parameter depends on the entry format of entry. If it's a string entry format then the type must be string. If it's a JSON entry format, then it can be any type, and the externalue will get appropriately converted to JSON. If it is a links format entry, then the type must by a JSON object. *)
 external make_hash :
   entry_type:string -> 'entry_data ->
   hash_string (*or_error *) = "makeHash" [@@bs.val]
 
+let make_hash = make_hash
+
 (** Sends output to the debugging log. The type of externalue is arbitrary and will get converted to a string according toteh language conversion limitations. *)
 external debug : 'a -> unit = "debug" [@@bs.val]
 
+let debug = debug
+
 (** Use the agent's private key to sign some contents *)
 external sign : string -> string = "sign" (* or_error *) [@@bs.val]
+
+let sign = sign
 
 (** Uses the signature, data and signatory's public key to verify the sign in contents of data. Result represents whether its a match or not. pubKeyshould be a public key. *)
 external verify_signature :
@@ -23,6 +31,8 @@ external verify_signature :
   pub_key:string ->
   bool (* or_error *) =
   "verifySignature"
+
+let verify_signature = verify_signature
 
 
 (** Attempts to commit an entry to your local source chain. It will cause callbac to your validaneCommitfunction. Returns either an error or the hash of the committed entry upon success. The type of the entryData parameter depends on the entry format of entry. If it's a string entry format then the type must be string. If it's a JSON entry format, then it can by any type, and the value will get appropriately converted to JSON. If it is a links format entry, then the type must by a JSON object.
@@ -38,9 +48,13 @@ external commit :
   hash_string (*or_error*) =
   "commit"
 
+let commit = commit
+
 (** Calls an exposed function from another zome. [arguments] is a string or an object depending on the [CallingType] that was specified in the function's definition in the DNA. Returns the externalue that's returned by the given function *)
 external call : zome_name:string -> function_name:string -> 'obj Js.t ->
   'value (*or_error *)= "call" [@@bs.val]
+
+let call = call
 
 (** Calls a bridged function from another app. [app_dna_hash] is the application being called. Note that the application must have explicitly been bridged. In development use hcdev's -bridgeSpecs and a bridge_specs.json file to setup bridging. Just like in send , the arguments parameter is a string or an object/hash depending on the CallingType that was specified in the function's definition. Returns the externalue that's returned by the given function on the other side of the bridge.
 *)
@@ -50,6 +64,8 @@ external bridge :
   function_name:string ->
   'obj Js.t ->
   'any_type = "bridge" [@@bs.val]
+
+let bridge = bridge
 
 (** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
     is [`To], [token] is non empty. *)
@@ -63,6 +79,8 @@ class type bridge' =
 (**This function allows your app to examine which bridges have been put in place. *)
 external get_bridges :
   unit -> bridge' array = "getBridges" [@@bs.val]
+
+let get_bridges = get_bridges
 
 (**
  *This function retrieves an entry from the local chain or the DHT. If options.StatusMask is present, it determines which entries to return, depending on their status. If options.GetMask is present, this option allows you to specify what information about the entry you want. For more on that, see Entry Objects and Masks.
@@ -84,7 +102,7 @@ external get_bridges :
 external get :
   hash_string -> options:'a Js.t -> 'entry Js.t =
   "get" [@@bs.val]
-
+let get = get
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an empty string it will return all the links on the baseand the list will also include the Tag property on entries. With options as {Load: false} (which is the default) returns a list of the form [{Hash:"QmY..."},..] With options as {Load: true} it will get the entry values of the links and return a list of the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only links with a certain status. Default is to return only Live links. You can use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
 
@@ -92,14 +110,17 @@ external get_links  :
   base:hash_string -> tag:string -> options:'a Js.t -> 'entry Js.t array =
   "getLinks"
 
+let get_links = get_links
+
 (** Commits a DelEntry to the local chain with given delete message, and, if the entry type of entry is not private, moves the entry to the Deleted status on the DHT. *)
 external remove : entry:'obj Js.t -> message:string -> hash_string =
   "remove" [@@bs.val]
+let remove = remove
 
 (** Attempts to commit an entry to your local source chain that "replaces" a previous entry. If entryType is not private, update will movereplaces to a Modifiedstatus on the DHT. Additionally the modification action will be recorded in the entries' header in the local chain, which will be used by validation routes. **)
 external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
   'string_or_obj Js.t = "update"
-
+let update = update
 (**
  * Keep in mind that you will want to retrieve most data from the DHT (shared data space), so that you are seeing what the rest of the nodes on your Holochain are seeing. However, there are times you will want to query private data fields, or package up data from your source chain for sending. In those cases you can use this function. query returns a list whose contents depend on what was chosen in the Returns option. If a single option was chosen, then it will be a bare list consisting of that item type. If more than than one return option was chosen, then it will be a list of items whose key will be the singular name of that option, i.e. Hash, Entry, or Header. See the examples below for reference.
 
@@ -161,6 +182,7 @@ external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
 external query :
   options:'obj Js.t -> 'query_obj Js.t (* or error *) list =
   "query" [@@bs.val]
+let query = query
 
 (** Commits a new agent entry to the chain, with either or both new identity information or a new public key, while revoking the old key. If revoking a key, also adds that key to the node blockedlist (which is also gossiped), as it's no longer a valid peer address.
 
@@ -174,7 +196,7 @@ external query :
 *)
 external update_agent :
   options: 'obj Js.t -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
-
+let update_agent = update_agent
 
 (** Sends a message to a node, using the App.Key.Hash of that node, its permanent address in the DHT. The return value of this function will be whatever is returned by the receive function on the receiving node. Alternatively, you can indicate that this call should be made asynchronously, and specify the callback function using these properties:
 
@@ -192,3 +214,4 @@ external update_agent :
 *)
 external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
   'any_type Js.t = "send" [@@bs.val]
+let send = send

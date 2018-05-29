@@ -1,4 +1,6 @@
 open Types
+
+(** Required callback functions *)
 module type REQUIRED = sig
 
     (** Each zome must include this function, which is called during system genesis. It executes just after the initial genesis entries are committed to your chain (1st - DNA entry, 2nd Identity entry). It enables you specify any additional operations you want performed when a node joins your holochain, for example, you may want to add some user/address/key information to the DHT to announce the presence of this new node. This function must return true if it is to succeed, and the application to start successfully. *)
@@ -35,8 +37,6 @@ module type REQUIRED = sig
       hash:hash_string ->
       package:'package_obj Js.t ->
       sources:string array -> bool
-
-
 
     (** This function gets called when ever links are being written to the DHT. Links are added for every linking element in the special "links" entry type. Note that this is a DHT level validation routine, in that it gets called when the Link message is received by a DHT node, not when the linking entry is committed. The regular validateCommit routine gets called as usual when that linking entry is committed to the source chain. For more background, read the Validation Functions section. *)
     val validateLink:

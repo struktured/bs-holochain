@@ -8,7 +8,7 @@ module type REQUIRED = sig
 
 
     (** This function gets called when an entry is about to be committed to a source chain. Use this function to describe the agreements about data as it should be added to shared Holochain. This function gets called for all entry types. For more background, read the Validation Functions section. *)
-    val validateCommit : entry_type:'obj Js.t -> entry:'any_type Js.t ->
+    val validateCommit : entry_type:string -> entry:'any_type Js.t ->
       package:'package_obj Js.t -> sources:string array -> bool
 
     (** This function gets called when an entry is about to be committed to the DHT on any node. It is very likely that this validation routine should check the same data integrity as validateCommit, but, as it happens during a different part of the data life-cycle, it may require additional validation steps. This function will only get called on entry types with "public" sharing, as they are the only types that get put to the DHT by the system. For more background, read the Validation Functions section. *)

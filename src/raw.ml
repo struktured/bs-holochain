@@ -50,13 +50,13 @@ external commit :
 
 let commit = commit
 
-(** Calls an exposed function from another zome. [arguments] is a string or an object depending on the [CallingType] that was specified in the function's definition in the DNA. Returns the externalue that's returned by the given function *)
+(** Calls an exposed function from another zome. [arguments] is a string or an object depending on the [CallingType] that was specified in the function's definition in the DNA. Returns the extern value that's returned by the given function *)
 external call : zome_name:string -> function_name:string -> 'obj Js.t ->
   'value (*or_error *)= "call" [@@bs.val]
 
 let call = call
 
-(** Calls a bridged function from another app. [app_dna_hash] is the application being called. Note that the application must have explicitly been bridged. In development use hcdev's -bridgeSpecs and a bridge_specs.json file to setup bridging. Just like in send , the arguments parameter is a string or an object/hash depending on the CallingType that was specified in the function's definition. Returns the externalue that's returned by the given function on the other side of the bridge.
+(** Calls a bridged function from another app. [app_dna_hash] is the application being called. Note that the application must have explicitly been bridged. In development use hcdev's -bridgeSpecs and a bridge_specs.json file to setup bridging. Just like in send, the arguments parameter is a string or an object/hash depending on the CallingType that was specified in the function's definition. Returns the external value that's returned by the given function on the other side of the bridge.
 *)
 external bridge :
   app_dna_hash:hash_string ->
@@ -121,6 +121,7 @@ let remove = remove
 external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
   'string_or_obj Js.t = "update"
 let update = update
+
 (**
  * Keep in mind that you will want to retrieve most data from the DHT (shared data space), so that you are seeing what the rest of the nodes on your Holochain are seeing. However, there are times you will want to query private data fields, or package up data from your source chain for sending. In those cases you can use this function. query returns a list whose contents depend on what was chosen in the Returns option. If a single option was chosen, then it will be a bare list consisting of that item type. If more than than one return option was chosen, then it will be a list of items whose key will be the singular name of that option, i.e. Hash, Entry, or Header. See the examples below for reference.
 

@@ -45,7 +45,7 @@ struct
       unit -> 'a Js.t
     val validate_link_pkg :
       unit -> 'a Js.t
-end
+  end
    module type S = sig include S0 end
 end
 
@@ -63,8 +63,10 @@ struct
 
     module Build(Genesis:sig val genesis : unit -> bool end) = struct
 
-      let module_of_entry_type (_entry_type:string) =
-        Belt_List.head (!entries)
+      let module_of_entry_type (entry_type:string) =
+        Belt_List.keep (!entries)
+          (fun (module E:Entry.S) -> entry_type = E.name) |>
+        Belt_List.head
 
       let module_of_entry_type_exn entry_type =
         match module_of_entry_type entry_type with

@@ -2,19 +2,19 @@ open Types
 (******************************************************************************)
 (** {2 Native Functions} *)
 (******************************************************************************)
-(** Returns an application property, which are defined by the app developer. It returns externalues from the DNA file that you set as properties of your application (e.g. Name, Language, Description, Author, etc.). *)
-external property : string -> string (*or_error *) = "property" [@@bs.val]
+(** Returns an application property, which are defined by the app developer. It returns values from the DNA file that you set as properties of your application (e.g. Name, Language, Description, Author, etc.). *)
+external property : string -> Js.Json.t (*or_error *) = "property" [@@bs.val]
 
 let property = property
 
-(** Use e this function to make a hash of the given entry data. This is the same hash externalue that would be returned if entryData were passed to commit and by which an entry of this type would be retrievable from the DHT using get. The type of the entryData parameter depends on the entry format of entry. If it's a string entry format then the type must be string. If it's a JSON entry format, then it can be any type, and the externalue will get appropriately converted to JSON. If it is a links format entry, then the type must by a JSON object. *)
+(** Use e this function to make a hash of the given entry data. This is the same hash value that would be returned if entryData were passed to commit and by which an entry of this type would be retrievable from the DHT using get. The type of the entryData parameter depends on the entry format of entry. If it's a string entry format then the type must be string. If it's a JSON entry format, then it can be any type, and the value will get appropriately converted to JSON. If it is a links format entry, then the type must by a JSON object. *)
 external make_hash :
-  entry_type:string -> 'entry_data ->
+  entry_type:string -> entry:Js.Json.t ->
   hash_string (*or_error *) = "makeHash" [@@bs.val]
 
 let make_hash = make_hash
 
-(** Sends output to the debugging log. The type of externalue is arbitrary and will get converted to a string according toteh language conversion limitations. *)
+(** Sends output to the debugging log. The type of value is arbitrary and will get converted to a string according toteh language conversion limitations. *)
 external debug : 'a -> unit = "debug" [@@bs.val]
 
 let debug = debug
@@ -44,15 +44,15 @@ let verify_signature = verify_signature
 *)
 external commit :
   entry_type:string ->
-  'any_type ->
+  entry:Js.Json.t ->
   hash_string (*or_error*) =
   "commit"
 
 let commit = commit
 
 (** Calls an exposed function from another zome. [arguments] is a string or an object depending on the [CallingType] that was specified in the function's definition in the DNA. Returns the extern value that's returned by the given function *)
-external call : zome_name:string -> function_name:string -> 'obj Js.t ->
-  'value (*or_error *)= "call" [@@bs.val]
+external call : zome_name:string -> function_name:string -> Js.Json.t ->
+  Js.Json.t = "call" [@@bs.val]
 
 let call = call
 
@@ -62,8 +62,8 @@ external bridge :
   app_dna_hash:hash_string ->
   zome_name:string ->
   function_name:string ->
-  'obj Js.t ->
-  'any_type = "bridge" [@@bs.val]
+  Js.Json.t ->
+  Js.Json.t = "bridge" [@@bs.val]
 
 let bridge = bridge
 
@@ -100,26 +100,26 @@ let get_bridges = get_bridges
    Returns: Entry-object OR HC.HashNotFound
 *)
 external get :
-  hash_string -> options:'a Js.t -> 'entry Js.t =
+  hash_string -> options:Js.Json.t -> Js.Json.t =
   "get" [@@bs.val]
 let get = get
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an empty string it will return all the links on the baseand the list will also include the Tag property on entries. With options as {Load: false} (which is the default) returns a list of the form [{Hash:"QmY..."},..] With options as {Load: true} it will get the entry values of the links and return a list of the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only links with a certain status. Default is to return only Live links. You can use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
 
 external get_links  :
-  base:hash_string -> tag:string -> options:'a Js.t -> 'entry Js.t array =
+  base:hash_string -> tag:string -> options:Js.Json.t -> Js.Json.t array =
   "getLinks"
 
 let get_links = get_links
 
 (** Commits a DelEntry to the local chain with given delete message, and, if the entry type of entry is not private, moves the entry to the Deleted status on the DHT. *)
-external remove : entry:'obj Js.t -> message:string -> hash_string =
+external remove : entry:Js.Json.t -> message:string -> hash_string =
   "remove" [@@bs.val]
 let remove = remove
 
 (** Attempts to commit an entry to your local source chain that "replaces" a previous entry. If entryType is not private, update will movereplaces to a Modifiedstatus on the DHT. Additionally the modification action will be recorded in the entries' header in the local chain, which will be used by validation routes. **)
-external update : entry_type:string -> entry_data:'string_or_obj Js.t ->
-  'string_or_obj Js.t = "update"
+external update : entry_type:string -> entry:Js.Json.t ->
+  Js.Json.t = "update"
 let update = update
 
 (**
@@ -181,7 +181,7 @@ let update = update
  */
  **)
 external query :
-  options:'obj Js.t -> 'query_obj Js.t (* or error *) list =
+  options:Js.Json.t -> Js.Json.t (* or error *) list =
   "query" [@@bs.val]
 let query = query
 
@@ -196,7 +196,7 @@ let query = query
     updateAgent({Identity:"newemail@example.com",Revocation:"sample revocation reason"})
 *)
 external update_agent :
-  options: 'obj Js.t -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
+  options: Js.Json.t -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
 let update_agent = update_agent
 
 (** Sends a message to a node, using the App.Key.Hash of that node, its permanent address in the DHT. The return value of this function will be whatever is returned by the receive function on the receiving node. Alternatively, you can indicate that this call should be made asynchronously, and specify the callback function using these properties:
@@ -213,6 +213,6 @@ let update_agent = update_agent
     options.Callback.ID: string
     Returns: any-type
 *)
-external send : hash_string -> message:'obj Js.t -> options:'obj Js.t ->
-  'any_type Js.t = "send" [@@bs.val]
+external send : hash_string -> message:Js.Json.t -> options:Js.Json.t ->
+  Js.Json.t = "send" [@@bs.val]
 let send = send

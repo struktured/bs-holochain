@@ -8,45 +8,48 @@ struct
     type t = obj Js.t
 
     val validate_commit :
-      package:'a Js.t ->
+      package:Js.Json.t ->
       sources: string array ->
       t ->
       bool
     val validate_put :
-      header:'obj Js.t ->
-      package:'a Js.t ->
+      header:Js.Json.t ->
+      package:Js.Json.t ->
       sources:string array ->
       t ->
       bool
     val validate_mod :
-      header:'obj Js.t ->
+      header:Js.Json.t ->
       replaces:hash_string ->
-      package:'a Js.t ->
+      package:Js.Json.t ->
       sources:string array ->
       t ->
       bool
     val validate_del :
       hash:hash_string ->
-      package:'a Js.t ->
+      package:Js.Json.t ->
       sources:string array ->
       bool
     val validate_link :
       hash:hash_string ->
-      package:'a Js.t ->
+      package:Js.Json.t ->
       sources:string array ->
-      links:'links Js.t array ->
+      links:Js.Json.t array ->
        bool
 
     val validate_put_pkg :
-      unit -> 'a Js.t
+      unit -> Js.Json.t
     val validate_mod_pkg :
-      unit -> 'a Js.t
+      unit -> Js.Json.t
     val validate_del_pkg :
-      unit -> 'a Js.t
+      unit -> Js.Json.t
     val validate_link_pkg :
-      unit -> 'a Js.t
+      unit -> Js.Json.t
   end
-   module type S = sig include S0 end
+   module type S = sig include S0
+     (*val get : hash_string -> options:Js.Json.t ->
+       t option*)
+   end
 end
 
 module Zome =
@@ -57,8 +60,9 @@ struct
 
     let entries : (module Entry.S) list ref = ref []
 
-    module Add(Entry : Entry.S) = struct
-      let () = entries := (module Entry)::!entries
+    module Add(E : Entry.S0) : Entry.S = struct
+      let () = entries := (module E : Entry.S)::!entries
+      include (E : Entry.S)
     end
 
     module Build(Genesis:sig val genesis : unit -> bool end) = struct
@@ -83,7 +87,7 @@ struct
           E.validate_commit
             ~package
             ~sources
-            (convert_type (entry:'a Js.t))
+            (convert_type (entry:Js.Json.t))
 
         let validatePut ~entry_type ~entry ~header ~package ~sources =
           let m =  module_of_entry_type_exn entry_type in

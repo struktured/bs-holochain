@@ -30,7 +30,7 @@ external verify_signature :
   data:string ->
   pub_key:string ->
   bool (* or_error *) =
-  "verifySignature"
+  "verifySignature" [@@bs.val]
 
 let verify_signature = verify_signature
 
@@ -46,7 +46,7 @@ external commit :
   entry_type:string ->
   entry:Js.Json.t ->
   hash_string (*or_error*) =
-  "commit"
+  "commit" [@@bs.val]
 
 let commit = commit
 
@@ -108,7 +108,7 @@ let get = get
 
 external get_links  :
   base:hash_string -> tag:string -> options:Js.Json.t -> Js.Json.t array =
-  "getLinks"
+  "getLinks" [@@bs.val]
 
 let get_links = get_links
 
@@ -119,7 +119,8 @@ let remove = remove
 
 (** Attempts to commit an entry to your local source chain that "replaces" a previous entry. If entryType is not private, update will movereplaces to a Modifiedstatus on the DHT. Additionally the modification action will be recorded in the entries' header in the local chain, which will be used by validation routes. **)
 external update : entry_type:string -> entry:Js.Json.t ->
-  Js.Json.t = "update"
+  Js.Json.t = "update" [@@bs.val]
+
 let update = update
 
 (**

@@ -8,6 +8,27 @@ struct
   end
 end
 
+module SendReceive =
+struct
+  module type S0 =
+  sig
+    type input
+    type output
+    val receive : hash_string -> input -> output
+  end
+
+  module type S = sig
+    include S0
+    val send : input -> output
+  end
+
+  module Make (T : S0) : S with type input = T.input with type output = T.output = struct
+    include T
+    external send : input -> output = "" [@@bs.val]
+    let send = send
+  end
+end
+
 module Function =
 struct
   module type S0 =
@@ -110,7 +131,9 @@ struct
       let () = entries := (module E : Entry.S) :: !entries
     end
 
-    module Build(Genesis:sig val genesis : unit -> bool end) = struct
+    module Build(G : sig val genesis : unit -> bool end) (SR : SendReceive.S0) =
+    struct
+      include SendReceive.Make(SR)
 
       let module_of_entry_type (entry_type:string) =
         Belt_List.keep (!entries)
@@ -123,7 +146,7 @@ struct
         | Some m -> m
 
       module Callback : Callbacks.REQUIRED = struct
-        include Genesis
+        include G
 
         let validateCommit ~entry_type ~entry ~package ~sources =
           let m = module_of_entry_type_exn entry_type in
@@ -192,6 +215,7 @@ struct
           let module E = (val m : Entry.S) in
           E.validate_link_pkg ()
       end
+      include Callback
     end
   end
 

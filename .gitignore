@@ -18,9 +18,10 @@
 *.annot
 *.cmj
 *.bak
-lib/bs
+/lib
 *.mlast
 *.mliast
 .vscode
 .merlin
 .bsb.lock
+node_modules

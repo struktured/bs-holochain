@@ -19,5 +19,6 @@
     "bs-platform": "^3.0.0"
   },
   "dependencies": {
+    "bs-json": "^1.0.1"
   }
 }

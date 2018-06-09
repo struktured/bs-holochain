@@ -1,5 +1,7 @@
+default:dev
 
 dev:
-	bsb
+	yarn build
 
-default:dev
+clean:
+	yarn clean

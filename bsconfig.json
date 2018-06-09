@@ -17,5 +17,6 @@
   "warnings": {
     "error" : "-101"
   },
+  "bsc-flags": ["-bs-super-errors"],
   "refmt": 3
 }

@@ -22,7 +22,9 @@ struct
     val send : input -> output
   end
 
-  module Make (T : S0) : S with type input = T.input with type output = T.output = struct
+  module Make (T : S0) :
+    S with type input = T.input with type output = T.output =
+  struct
     include T
     external send : input -> output = "" [@@bs.val]
     let send = send
@@ -43,7 +45,8 @@ struct
     val call : input -> output
   end
 
-  module Make (Z : Zome0.S0) (T : S0) : S with type input = T.input with type output = T.output = struct
+  module Make (Z : Zome0.S0) (T : S0) :
+    S with type input = T.input with type output = T.output = struct
     include T
     external call : zome_name:string -> function_name:string -> input -> output = "" [@@bs.val]
     let call args = call ~zome_name:Z.name ~function_name:T.name args
@@ -85,7 +88,7 @@ struct
       package:Js.Json.t ->
       sources:string array ->
       links:Js.Json.t array ->
-       bool
+      bool
 
     val validate_put_pkg :
       unit -> Js.Json.t
@@ -131,7 +134,9 @@ struct
       let () = entries := (module E : Entry.S) :: !entries
     end
 
-    module Build(G : sig val genesis : unit -> bool end) (SR : SendReceive.S0) =
+    module Build
+        (G : sig val genesis : unit -> bool end)
+        (SR : SendReceive.S0) =
     struct
       include SendReceive.Make(SR)
 

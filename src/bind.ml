@@ -14,7 +14,7 @@ struct
   sig
     type input
     type output
-    val receive : hash_string -> input -> output
+    val receive : hashString -> input -> output
   end
 
   module type S = sig
@@ -48,8 +48,9 @@ struct
   module Make (Z : Zome0.S0) (T : S0) :
     S with type input = T.input with type output = T.output = struct
     include T
-    external call : zome_name:string -> function_name:string -> input -> output = "" [@@bs.val]
-    let call args = call ~zome_name:Z.name ~function_name:T.name args
+    external call :
+      zomeName:string -> functionName:string -> input -> output = "" [@@bs.val]
+    let call args = call ~zomeName:Z.name ~functionName:T.name args
   end
 end
 
@@ -60,63 +61,63 @@ struct
     val name : string
     type t [@@bs.deriving abstract]
 
-    val validate_commit :
+    val validateCommit :
       package:Js.Json.t ->
       sources: string array ->
       t ->
       bool
-    val validate_put :
+    val validatePut :
       header:Js.Json.t ->
       package:Js.Json.t ->
       sources:string array ->
       t ->
       bool
-    val validate_mod :
+    val validateMod :
       header:Js.Json.t ->
-      replaces:hash_string ->
+      replaces:hashString ->
       package:Js.Json.t ->
       sources:string array ->
       t ->
       bool
-    val validate_del :
-      hash:hash_string ->
+    val validateDel :
+      hash:hashString ->
       package:Js.Json.t ->
       sources:string array ->
       bool
-    val validate_link :
-      hash:hash_string ->
+    val validateLink :
+      hash:hashString ->
       package:Js.Json.t ->
       sources:string array ->
       links:Js.Json.t array ->
       bool
 
-    val validate_put_pkg :
+    val validatePutPkg :
       unit -> Js.Json.t
-    val validate_mod_pkg :
+    val validateModPkg :
       unit -> Js.Json.t
-    val validate_del_pkg :
+    val validateDelPkg :
       unit -> Js.Json.t
-    val validate_link_pkg :
+    val validateLinkPkg :
       unit -> Js.Json.t
   end
 
   module type S = sig
     include S0
-    val convert_type : Js.Json.t -> t
-    val get : hash_string -> options:Js.Json.t -> t
-    val make_hash : t -> hash_string
+    val convertType : Js.Json.t -> t
+    val get : hashString -> options:Js.Json.t -> t
+    val makeHash : t -> hashString
   end
 
   module Make ( E : S0 ) : S with type t = E.t = struct
     include E
-    external convert_type : Js.Json.t -> t = "%identity"
-    external get : hash_string -> options:Js.Json.t -> t = "" [@@bs.val]
-    external make_hash : entry_type:string -> t -> hash_string = "makeHash" [@@bs.val]
-    external commit : entry_type:string -> t -> hash_string = "" [@@bs.val]
-    let make_hash = make_hash ~entry_type:name
-    let convert_type = convert_type
+    external convertType : Js.Json.t -> t = "%identity"
+    external get : hashString -> options:Js.Json.t -> t = "" [@@bs.val]
+    external makeHash : entryType:string -> t -> hashString = "" [@@bs.val]
+    external commit : entryType:string -> t -> hashString = "" [@@bs.val]
+    let makeHash = makeHash ~entryType:name
+    let convertType = convertType
     let get = get
-    let commit = commit ~entry_type:E.name
+    let commit = commit ~entryType:E.name
   end
 end
 
@@ -140,85 +141,85 @@ struct
     struct
       include SendReceive.Make(SR)
 
-      let module_of_entry_type (entry_type:string) =
+      let moduleOfEntryType (entryType:string) =
         Belt_List.keep (!entries)
-          (fun (module E:Entry.S) -> entry_type = E.name) |>
+          (fun (module E:Entry.S) -> entryType = E.name) |>
         Belt_List.head
 
-      let module_of_entry_type_exn entry_type =
-        match module_of_entry_type entry_type with
+      let moduleOfEntryType_exn entryType =
+        match moduleOfEntryType entryType with
         | None -> failwith "no module for entry type"
         | Some m -> m
 
       module Callback : Callbacks.REQUIRED = struct
         include G
 
-        let validateCommit ~entry_type ~entry ~package ~sources =
-          let m = module_of_entry_type_exn entry_type in
+        let validateCommit ~entryType ~entry ~package ~sources =
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_commit
+          E.validateCommit
             ~package
             ~sources
-            (E.convert_type (entry : Js.Json.t))
+            (E.convertType (entry : Js.Json.t))
 
-        let validatePut ~entry_type ~entry ~header ~package ~sources =
-          let m =  module_of_entry_type_exn entry_type in
+        let validatePut ~entryType ~entry ~header ~package ~sources =
+          let m =  moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_put
+          E.validatePut
             ~header
             ~package
             ~sources
-            (E.convert_type entry)
+            (E.convertType entry)
 
-        let validateMod ~entry_type ~entry
+        let validateMod ~entryType ~entry
             ~header ~replaces ~package ~sources =
-          let m = module_of_entry_type_exn entry_type in
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_mod
+          E.validateMod
             ~header
             ~replaces
             ~package
             ~sources
-            (E.convert_type entry)
+            (E.convertType entry)
 
-        let validateDel ~(entry_type:string)
+        let validateDel ~(entryType:string)
             ~hash ~package ~sources =
-          let m = module_of_entry_type_exn entry_type in
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_del
+          E.validateDel
             ~hash
             ~package
             ~sources
 
-        let validateLink ~entry_type
+        let validateLink ~entryType
             ~hash ~links ~package ~sources =
-          let m = module_of_entry_type_exn entry_type in
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_link
+          E.validateLink
             ~hash
             ~links
             ~package
             ~sources
 
-        let validatePutPkg ~entry_type =
-          let m = module_of_entry_type_exn entry_type in
+        let validatePutPkg ~entryType =
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_put_pkg ()
+          E.validatePutPkg ()
 
-        let validateModPkg ~entry_type =
-          let m = module_of_entry_type_exn entry_type in
+        let validateModPkg ~entryType =
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_mod_pkg ()
+          E.validateModPkg ()
 
-        let validateDelPkg ~entry_type =
-          let m = module_of_entry_type_exn entry_type in
+        let validateDelPkg ~entryType =
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_del_pkg ()
+          E.validateDelPkg ()
 
-        let validateLinkPkg ~entry_type =
-          let m = module_of_entry_type_exn entry_type in
+        let validateLinkPkg ~entryType =
+          let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in
-          E.validate_link_pkg ()
+          E.validateLinkPkg ()
       end
       include Callback
     end

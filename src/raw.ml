@@ -9,9 +9,9 @@ external property : string -> Js.Json.t (*or_error *) = "property" [@@bs.val]
  * application (e.g. Name, Language, Description, Author, etc.). *)
 let property = property
 
-external make_hash :
-  entry_type:string -> entry:'a ->
-  hash_string (*or_error *) = "makeHash" [@@bs.val]
+external makeHash :
+  entryType:string -> entry:'a ->
+  hashString (*or_error *) = "makeHash" [@@bs.val]
 
 (** Use this function to make a hash of the given entry data. This is the same
  * hash value that would be returned if entryData were passed to commit and by
@@ -21,7 +21,7 @@ external make_hash :
  * entry format, then it can be any type, and the value will get appropriately
  * converted to JSON. If it is a links format entry, then the type must by a
  * JSON object. *)
-let make_hash = make_hash
+let make = makeHash
 
 external debug : 'a -> unit = "debug" [@@bs.val]
 
@@ -30,29 +30,29 @@ external debug : 'a -> unit = "debug" [@@bs.val]
  * *)
 let debug = debug
 
-external sign : string -> string = "sign" (* or_error *) [@@bs.val]
+external sign : string -> string = "" (* or_error *) [@@bs.val]
 
 (** Use the agent's private key to sign some contents *)
 let sign = sign
 
-external verify_signature :
+external verifySignature :
   signature:string ->
   data:string ->
-  pub_key:string ->
+  pubKey:string ->
   bool (* or_error *) =
-  "verifySignature" [@@bs.val]
+  "" [@@bs.val]
 
 (** Uses the signature, data and signatory's public key to verify the sign in
 * contents of data. Result represents whether its a match or not. pubKeyshould
 * be a public key. *)
-let verify_signature = verify_signature
+let verifySignature = verifySignature
 
 
 external commit :
   entry_type:string ->
   entry:'a ->
-  hash_string (*or_error*) =
-  "commit" [@@bs.val]
+  hashString (*or_error*) =
+  "" [@@bs.val]
 
 (** Attempts to commit an entry to your local source chain. It will cause
  * callbac to your validaneCommitfunction. Returns either an error or the hash
@@ -73,7 +73,7 @@ external commit :
 *)
 let commit = commit
 
-external call : zome_name:string -> function_name:string -> 'args ->
+external call : zomeName:string -> functionName:string -> 'args ->
   Js.Json.t = "call" [@@bs.val]
 
 (** Calls an exposed function from another zome. [arguments] is a string or an
@@ -83,11 +83,11 @@ external call : zome_name:string -> function_name:string -> 'args ->
 let call = call
 
 external bridge :
-  app_dna_hash:hash_string ->
-  zome_name:string ->
-  function_name:string ->
+  appDnaHash:hashString ->
+  zomeName:string ->
+  functionName:string ->
   'arguments ->
-  Js.Json.t = "bridge" [@@bs.val]
+  Js.Json.t = "" [@@bs.val]
 
 (** Calls a bridged function from another app. [app_dna_hash] is the
  * application being called. Note that the application must have explicitly
@@ -99,25 +99,16 @@ external bridge :
 *)
 let bridge = bridge
 
-(** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
-    is [`To], [token] is non empty. *)
-class type bridge' =
-  object
-    method toApp : hash_string [@@bs.set]
-    method side:[`From | `To] [@@bs.set]
-    method token:string [@@bs.set]
-  end [@@bs]
 
-
-external get_bridges :
-  unit -> bridge' array = "getBridges" [@@bs.val]
+external getBridges :
+  unit -> bridge array = "getBridges" [@@bs.val]
 
 (** This function allows your app to examine which bridges have been put in
 * place. *)
-let get_bridges = get_bridges
+let getBridges = getBridges
 
 external get :
-  hash_string -> options:'a -> Js.Json.t =
+  hashString -> options:'a -> Js.Json.t =
   "get" [@@bs.val]
 
 (** This function retrieves an entry from the local chain or the DHT. If
@@ -148,9 +139,9 @@ external get :
 *)
 let get = get
 
-external get_links  :
-  base:hash_string -> tag:string -> options:'a -> Js.Json.t array =
-  "getLinks" [@@bs.val]
+external getLinks  :
+  base:hashString -> tag:string -> options:linkOptions -> Js.Json.t array =
+  "" [@@bs.val]
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an
  * empty string it will return all the links on the baseand the list will also
@@ -161,10 +152,10 @@ external get_links  :
  * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
  * links with a certain status. Default is to return only Live links. You can
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
-let get_links = get_links
+let getLinks = getLinks
 
-external remove : entry:Js.Json.t -> message:string -> hash_string =
-  "remove" [@@bs.val]
+external remove : entry:Js.Json.t -> message:string -> hashString =
+  "" [@@bs.val]
 
 
 (** Commits a DelEntry to the local chain with given delete message, and, if
@@ -184,8 +175,8 @@ external update : entry_type:string -> entry:'a ->
 let update = update
 
 external query :
-  options:'a -> Js.Json.t (* or error *) list =
-  "query" [@@bs.val]
+  options:'a -> Js.Json.t (* or error *) array =
+  "" [@@bs.val]
 
 (**
  * Keep in mind that you will want to retrieve most data from the DHT (shared
@@ -256,8 +247,8 @@ external query :
  **)
 let query = query
 
-external update_agent :
-  options: 'a -> hash_string (* or-error *) = "updateAgent" [@@bs.val]
+external updateAgent :
+  options: 'a -> hashString (* or-error *) = "" [@@bs.val]
 
 (** Commits a new agent entry to the chain, with either or both new identity
  * information or a new public key, while revoking the old key. If revoking a
@@ -272,10 +263,10 @@ external update_agent :
     expand_less JS example
     updateAgent({Identity:"newemail@example.com",Revocation:"sample revocation reason"})
 *)
-let update_agent = update_agent
+let updateAgent = updateAgent
 
-external send : hash_string -> message:'a -> options:'a ->
-  Js.Json.t = "send" [@@bs.val]
+external send : hashString -> message:'a -> options:'a ->
+  Js.Json.t = "" [@@bs.val]
 
 (** Sends a message to a node, using the App.Key.Hash of that node, its
  * permanent address in the DHT. The return value of this function will be

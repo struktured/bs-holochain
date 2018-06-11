@@ -19,7 +19,7 @@ module type REQUIRED = sig
    * it should be added to shared Holochain. This function gets called for all
    * entry types. For more background, read the Validation Functions section.
    * *)
-  val validateCommit : entry_type:string -> entry:Js.Json.t ->
+  val validateCommit : entryType:string -> entry:Js.Json.t ->
     package:Js.Json.t -> sources:string array -> bool
 
   (** This function gets called when an entry is about to be committed to the
@@ -30,7 +30,7 @@ module type REQUIRED = sig
    * "public" sharing, as they are the only types that get put to the DHT by
    * the system. For more background, read the Validation Functions section. *)
   val validatePut :
-    entry_type:string ->
+    entryType:string ->
     entry:Js.Json.t ->
     header:Js.Json.t ->
     package:Js.Json.t ->
@@ -41,18 +41,18 @@ module type REQUIRED = sig
       read the Validation Functions section.
   *)
   val validateMod :
-    entry_type:string (* enum? *) ->
+    entryType:string (* enum? *) ->
     entry:Js.Json.t ->
     header:Js.Json.t ->
-    replaces:hash_string ->
+    replaces:hashString ->
     package:Js.Json.t ->
     sources:string array -> bool
 
   (** This function gets called as a consequence of a del command being issued.
    * For more background, read the Validation Functions section. *)
   val validateDel :
-    entry_type:string (* enum? *) ->
-    hash:hash_string ->
+    entryType:string (* enum? *) ->
+    hash:hashString ->
     package:Js.Json.t ->
     sources:string array -> bool
 
@@ -64,8 +64,8 @@ module type REQUIRED = sig
    * as usual when that linking entry is committed to the source chain. For
    * more background, read the Validation Functions section. *)
   val validateLink:
-    entry_type:string (* enum? *) ->
-    hash:hash_string ->
+    entryType:string (* enum? *) ->
+    hash:hashString ->
     links:Js.Json.t array ->
     package:Js.Json.t ->
     sources:string array -> bool
@@ -80,7 +80,7 @@ module type REQUIRED = sig
       when committing happens as validateCommit must have the same data
       available to it as does validatePut. *)
   val validatePutPkg :
-    entry_type:string -> Js.Json.t (* or nil *)
+    entryType:string -> Js.Json.t (* or nil *)
 
   (** This function should simply return nil if the data required by its
    * corresponding validation function is just the minimum default of the Entry
@@ -88,7 +88,7 @@ module type REQUIRED = sig
    * Request" object, which specifies what data to be sent to the validating
    * node. For more background, read the Validation Packaging section. *)
   val validateModPkg :
-    entry_type:string -> Js.Json.t (* or nil *)
+    entryType:string -> Js.Json.t (* or nil *)
 
   (** This function should simply return nil if the data required by its
    * corresponding validation function is just the minimum default of the Entry
@@ -96,7 +96,7 @@ module type REQUIRED = sig
    * Request" object, which specifies what data to be sent to the validating
    * node. For more background, read the Validation Packaging section. *)
   val validateDelPkg:
-    entry_type:string -> Js.Json.t (* or nil *)
+    entryType:string -> Js.Json.t (* or nil *)
 
   (** This function should simply return nil if the data required by its
    * corresponding validation function is just the minimum default of the Entry
@@ -104,7 +104,7 @@ module type REQUIRED = sig
    * Request" object, which specifies what data to be sent to the validating
    * node. For more background, read the Validation Packaging section. *)
   val validateLinkPkg:
-    entry_type:string -> Js.Json.t (* or nil *)
+    entryType:string -> Js.Json.t (* or nil *)
 
 end
 
@@ -116,7 +116,7 @@ module type OPTIONAL = sig
    * Zomes which want to call functions in other applications MAY define a
    * bridgeGenesis function and declare that they do so by setting the
    * Zome.BridgeTo value in their DNA. *)
-  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:hash_string ->
+  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:hashString ->
     app_data:string -> bool
 
   (** This function gets called by the system when a message is received by a
@@ -124,6 +124,6 @@ module type OPTIONAL = sig
    * will be the result of the send function that sent the message. The value
    * you return from this function will be sent back to the node that sent you
    * the message. *)
-  val receive : hash_string -> message:Js.Json.t -> options:Js.Json.t ->
+  val receive : hashString -> message:Js.Json.t -> options:Js.Json.t ->
     Js.Json.t
 end

@@ -1,10 +1,16 @@
 open Types
 
+(** Module which requires a string name identifier *)
+module Named = struct
+  module type S = sig val name : string end
+end
+
+
 module Zome0 =
 struct
   module type S0 =
   sig
-    val name : string
+    include Named.S
   end
 end
 
@@ -31,13 +37,16 @@ struct
   end
 end
 
+(** A zome funtion with strict input and output type definitions. *)
 module Function =
 struct
   module type S0 =
   sig
+    include Named.S
     type input
     type output
-    val name : string
+   (** Invoke the function on the local chain directly *)
+    val local : input -> output
   end
 
   module type S = sig
@@ -121,17 +130,66 @@ struct
   end
 end
 
+
+module GetLinks = struct
+
+  type packed =
+    {hash:hashString;entryType:string;entry:Js.Json.t;source:hashString}
+
+  let getLinks ?(tag:string option) ?(options:linkOptions option) ~base =
+    let entries = Raw.getLinks ?tag ?options ~base in
+    Array.map
+      (fun entry_info ->
+         match Js.Json.decodeObject entry_info with
+         | None ->
+           Js.log2 "unexpected link info shape:" entry_info;
+           failwith "unexpected link info shape"
+         | Some dict ->
+           let hash:hashString =
+             Belt_Option.getExn (Js.Dict.get dict "Hash") |>
+             Js.Json.stringify in
+           (match Belt_Option.map
+                    (Js.Dict.get dict "EntryType") Js.Json.stringify with
+           | None -> `Hash hash
+           | Some entryType ->
+             let entry = Belt_Option.getExn
+                 (Js.Dict.get dict "Entry") in
+             let source : hashString =
+               Belt_Option.getExn (Js.Dict.get dict "Source") |>
+               Js.Json.stringify in
+             `Entry {hash;entryType; entry; source}
+           )
+      )
+      entries
+
+  type 'a unpacked = {entry:'a;source:hashString;hash:hashString}
+
+  let unpack
+      (type entry)
+      (module E : Entry.S with type t = entry)
+      links : entry unpacked array =
+    Belt_Array.keepMap links
+      (function
+        | `Hash (_hash:hashString) -> None
+        | `Entry {hash;entryType;entry;source} ->
+          match entryType = E.name with
+          | true -> Some {source;entry=E.convertType entry;hash}
+          | false -> None
+      )
+
+end
+
 module Zome =
 struct
 
-  module Builder() =
+  module Builder () =
   struct
 
     let entries : (module Entry.S) list ref = ref []
 
-    module Add(E0 : Entry.S0) : Entry.S = struct
+    module Add(E0 : Entry.S0) : Entry.S with type t = E0.t = struct
       module E = Entry.Make(E0)
-      include (E : Entry.S)
+      include (E : Entry.S with type t = E0.t)
       let () = entries := (module E : Entry.S) :: !entries
     end
 
@@ -182,7 +240,7 @@ struct
             ~sources
             (E.convertType entry)
 
-        let validateDel ~(entryType:string)
+        let validateDel ~entryType
             ~hash ~package ~sources =
           let m = moduleOfEntryType_exn entryType in
           let module E = (val m : Entry.S) in

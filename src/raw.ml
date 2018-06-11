@@ -49,7 +49,7 @@ let verifySignature = verifySignature
 
 
 external commit :
-  entry_type:string ->
+  entryType:string ->
   entry:'a ->
   hashString (*or_error*) =
   "" [@@bs.val]
@@ -140,7 +140,7 @@ external get :
 let get = get
 
 external getLinks  :
-  base:hashString -> tag:string -> options:linkOptions -> Js.Json.t array =
+  base:hashString -> tag:string -> options:linkOptions option -> Js.Json.t array =
   "" [@@bs.val]
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an
@@ -152,7 +152,7 @@ external getLinks  :
  * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
  * links with a certain status. Default is to return only Live links. You can
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
-let getLinks = getLinks
+let getLinks ?(tag="") ?options = getLinks ~tag ~options
 
 external remove : entry:Js.Json.t -> message:string -> hashString =
   "" [@@bs.val]
@@ -163,8 +163,8 @@ external remove : entry:Js.Json.t -> message:string -> hashString =
   * status on the DHT. *)
 let remove = remove
 
-external update : entry_type:string -> entry:'a ->
-  Js.Json.t = "update" [@@bs.val]
+external update : entryType:string -> entry:'a ->
+  Js.Json.t = "" [@@bs.val]
 
 (** Attempts to commit an entry to your local source chain that "replaces" a
  * previous entry. If entryType is not private, update will movereplaces to a

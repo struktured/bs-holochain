@@ -5,8 +5,8 @@ type hashString = string
 *)
 type link = {
   base : hashString [@bs.as "Base"];
-  link : hashString [@bs.as "Link"];
-  tag : string [@bs.as "Tag"];
+  to_ : hashString [@bs.as "Link"];
+  tag : string option [@bs.as "Tag"];
 } [@@bs.deriving abstract]
 
 (** Options for the getLinks function. If [load] is true
@@ -23,6 +23,9 @@ type linkOptions = {
   statusMask :
     [`Live | `Deleted | `Reject] [@bs.as "StatusMask"] [@bs.int]
 } [@@bs.deriving abstract]
+
+let defaultLinkOptions =
+  linkOptions ~load:false ~statusMask:`Live
 
 (** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
     is [`To], [token] is non empty. *)

@@ -1,11 +1,5 @@
 open Types
 
-(** Module which requires a string name identifier *)
-module Named = struct
-  module type S = sig val name : string end
-end
-
-
 module Zome0 =
 struct
   module type S0 =
@@ -13,124 +7,6 @@ struct
     include Named.S
   end
 end
-
-module SendReceive =
-struct
-  module type S0 =
-  sig
-    type input
-    type output
-    val receive : hashString -> input -> output
-  end
-
-  module type S = sig
-    include S0
-    val send : input -> output
-  end
-
-  module Make (T : S0) :
-    S with type input = T.input with type output = T.output =
-  struct
-    include T
-    external send : input -> output = "" [@@bs.val]
-    let send = send
-  end
-end
-
-(** A zome funtion with strict input and output type definitions. *)
-module Function =
-struct
-  module type S0 =
-  sig
-    include Named.S
-    type input
-    type output
-   (** Invoke the function on the local chain directly *)
-    val local : input -> output
-  end
-
-  module type S = sig
-    include S0
-    val call : input -> output
-  end
-
-  module Make (Z : Zome0.S0) (T : S0) :
-    S with type input = T.input with type output = T.output = struct
-    include T
-    external call :
-      zomeName:string -> functionName:string -> input -> output = "" [@@bs.val]
-    let call args = call ~zomeName:Z.name ~functionName:T.name args
-  end
-end
-
-module Entry =
-struct
-  module type S0 =
-  sig
-    val name : string
-    type t [@@bs.deriving abstract]
-
-    val validateCommit :
-      package:Js.Json.t ->
-      sources: string array ->
-      t ->
-      bool
-    val validatePut :
-      header:Js.Json.t ->
-      package:Js.Json.t ->
-      sources:string array ->
-      t ->
-      bool
-    val validateMod :
-      header:Js.Json.t ->
-      replaces:hashString ->
-      package:Js.Json.t ->
-      sources:string array ->
-      t ->
-      bool
-    val validateDel :
-      hash:hashString ->
-      package:Js.Json.t ->
-      sources:string array ->
-      bool
-    val validateLink :
-      hash:hashString ->
-      package:Js.Json.t ->
-      sources:string array ->
-      links:Js.Json.t array ->
-      bool
-
-    val validatePutPkg :
-      unit -> Js.Json.t
-    val validateModPkg :
-      unit -> Js.Json.t
-    val validateDelPkg :
-      unit -> Js.Json.t
-    val validateLinkPkg :
-      unit -> Js.Json.t
-  end
-
-  module type S = sig
-    include S0
-    val convertType : Js.Json.t -> t
-    val get : hashString -> options:Js.Json.t -> t
-    val makeHash : t -> hashString
-  end
-
-  module Make ( E : S0 ) : S with type t = E.t = struct
-    include E
-    external convertType : Js.Json.t -> t = "%identity"
-    external get : hashString -> options:Js.Json.t -> t = "" [@@bs.val]
-    external makeHash : entryType:string -> t -> hashString = "" [@@bs.val]
-    external commit : entryType:string -> t -> hashString = "" [@@bs.val]
-    let makeHash = makeHash ~entryType:name
-    let convertType = convertType
-    let get = get
-    let commit = commit ~entryType:E.name
-  end
-end
-
-
 module GetLinks = struct
 
   type packed =
@@ -195,9 +71,9 @@ struct
 
     module Build
         (G : sig val genesis : unit -> bool end)
-        (SR : SendReceive.S0) =
+        (SR : Sendreceive.S0) =
     struct
-      include SendReceive.Make(SR)
+      include Sendreceive.Make(SR)
 
       let moduleOfEntryType (entryType:string) =
         Belt_List.keep (!entries)

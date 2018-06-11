@@ -1,3 +1,9 @@
+
+(** Module which requires a string name identifier *)
+module Named = struct
+  module type S = sig val name : string end
+end
+
 type hashString = string
 
 (** Represents a link from an entry at [base] to hash [link]. [tag] is optional

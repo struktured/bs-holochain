@@ -139,10 +139,10 @@ module GetLinks = struct
   let getLinks ?(tag:string option) ?(options:linkOptions option) ~base =
     let entries = Raw.getLinks ?tag ?options ~base in
     Array.map
-      (fun entry_info ->
-         match Js.Json.decodeObject entry_info with
+      (fun entryInfo ->
+         match Js.Json.decodeObject entryInfo with
          | None ->
-           Js.log2 "unexpected link info shape:" entry_info;
+           Js.log2 "unexpected link info shape:" entryInfo;
            failwith "unexpected link info shape"
          | Some dict ->
            let hash:hashString =

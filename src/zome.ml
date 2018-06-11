@@ -1,12 +1,7 @@
 open Types
 
-module Zome0 =
-struct
-  module type S0 =
-  sig
-    include Named.S
-  end
-end
+module type S0 = Named.S
+
 module GetLinks = struct
 
   type packed =
@@ -55,109 +50,106 @@ module GetLinks = struct
 
 end
 
-module Zome =
+
+module Builder () =
 struct
 
-  module Builder () =
-  struct
+  let entries : (module Entry.S) list ref = ref []
 
-    let entries : (module Entry.S) list ref = ref []
-
-    module Add(E0 : Entry.S0) : Entry.S with type t = E0.t = struct
-      module E = Entry.Make(E0)
-      include (E : Entry.S with type t = E0.t)
-      let () = entries := (module E : Entry.S) :: !entries
-    end
-
-    module Build
-        (G : sig val genesis : unit -> bool end)
-        (SR : Sendreceive.S0) =
-    struct
-      include Sendreceive.Make(SR)
-
-      let moduleOfEntryType (entryType:string) =
-        Belt_List.keep (!entries)
-          (fun (module E:Entry.S) -> entryType = E.name) |>
-        Belt_List.head
-
-      let moduleOfEntryType_exn entryType =
-        match moduleOfEntryType entryType with
-        | None -> failwith "no module for entry type"
-        | Some m -> m
-
-      module Callback : Callbacks.REQUIRED = struct
-        include G
-
-        let validateCommit ~entryType ~entry ~package ~sources =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateCommit
-            ~package
-            ~sources
-            (E.convertType (entry : Js.Json.t))
-
-        let validatePut ~entryType ~entry ~header ~package ~sources =
-          let m =  moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validatePut
-            ~header
-            ~package
-            ~sources
-            (E.convertType entry)
-
-        let validateMod ~entryType ~entry
-            ~header ~replaces ~package ~sources =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateMod
-            ~header
-            ~replaces
-            ~package
-            ~sources
-            (E.convertType entry)
-
-        let validateDel ~entryType
-            ~hash ~package ~sources =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateDel
-            ~hash
-            ~package
-            ~sources
-
-        let validateLink ~entryType
-            ~hash ~links ~package ~sources =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateLink
-            ~hash
-            ~links
-            ~package
-            ~sources
-
-        let validatePutPkg ~entryType =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validatePutPkg ()
-
-        let validateModPkg ~entryType =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateModPkg ()
-
-        let validateDelPkg ~entryType =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateDelPkg ()
-
-        let validateLinkPkg ~entryType =
-          let m = moduleOfEntryType_exn entryType in
-          let module E = (val m : Entry.S) in
-          E.validateLinkPkg ()
-      end
-      include Callback
-    end
+  module Add(E0 : Entry.S0) : Entry.S with type t = E0.t = struct
+    module E = Entry.Make(E0)
+    include (E : Entry.S with type t = E0.t)
+    let () = entries := (module E : Entry.S) :: !entries
   end
 
+  module Build
+      (G : sig val genesis : unit -> bool end)
+      (SR : Sendreceive.S0) =
+  struct
+    include Sendreceive.Make(SR)
+
+    let moduleOfEntryType (entryType:string) =
+      Belt_List.keep (!entries)
+        (fun (module E:Entry.S) -> entryType = E.name) |>
+      Belt_List.head
+
+    let moduleOfEntryType_exn entryType =
+      match moduleOfEntryType entryType with
+      | None -> failwith "no module for entry type"
+      | Some m -> m
+
+    module Callback : Callbacks.REQUIRED = struct
+      include G
+
+      let validateCommit ~entryType ~entry ~package ~sources =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateCommit
+          ~package
+          ~sources
+          (E.convertType (entry : Js.Json.t))
+
+      let validatePut ~entryType ~entry ~header ~package ~sources =
+        let m =  moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validatePut
+          ~header
+          ~package
+          ~sources
+          (E.convertType entry)
+
+      let validateMod ~entryType ~entry
+          ~header ~replaces ~package ~sources =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateMod
+          ~header
+          ~replaces
+          ~package
+          ~sources
+          (E.convertType entry)
+
+      let validateDel ~entryType
+          ~hash ~package ~sources =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateDel
+          ~hash
+          ~package
+          ~sources
+
+      let validateLink ~entryType
+          ~hash ~links ~package ~sources =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateLink
+          ~hash
+          ~links
+          ~package
+          ~sources
+
+      let validatePutPkg ~entryType =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validatePutPkg ()
+
+      let validateModPkg ~entryType =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateModPkg ()
+
+      let validateDelPkg ~entryType =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateDelPkg ()
+
+      let validateLinkPkg ~entryType =
+        let m = moduleOfEntryType_exn entryType in
+        let module E = (val m : Entry.S) in
+        E.validateLinkPkg ()
+    end
+    include Callback
+  end
 end
+
 

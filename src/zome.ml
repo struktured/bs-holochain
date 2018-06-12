@@ -28,7 +28,7 @@ module GetLinks = struct
              let source : hashString =
                Belt_Option.getExn (Js.Dict.get dict "Source") |>
                Js.Json.stringify in
-             `Entry {hash;entryType; entry; source}
+             `Packed {hash; entryType; entry; source}
            )
       )
       entries
@@ -42,7 +42,7 @@ module GetLinks = struct
     Belt_Array.keepMap links
       (function
         | `Hash (_hash:hashString) -> None
-        | `Entry {hash;entryType;entry;source} ->
+        | `Packed {hash;entryType;entry;source} ->
           match entryType = E.name with
           | true -> Some {source;entry=E.convertType entry;hash}
           | false -> None
@@ -54,12 +54,31 @@ end
 module Builder () =
 struct
 
-  let entries : (module Entry.S) list ref = ref []
+  module type HANDLER = sig
+    include Entry.S
+    include Validate.S with type t := t
+  end
 
-  module Add(E0 : Entry.S0) : Entry.S with type t = E0.t = struct
+
+  let entries : (module HANDLER) Belt_Map.String.t ref
+    = ref Belt_Map.String.empty
+
+  module Add
+      (E0 : Entry.S0)
+      (V : Validate.S with type t = E0.t) :
+    Entry.S with type t = E0.t = struct
     module E = Entry.Make(E0)
+    module Handler : HANDLER with type t = E.t =
+      struct
+        include (E : Entry.S with type t = E.t)
+        include (V : Validate.S with type t := t)
+      end
     include (E : Entry.S with type t = E0.t)
-    let () = entries := (module E : Entry.S) :: !entries
+    let () = entries :=
+        Belt_Map.String.set
+          (!entries) E0.name
+          (module Handler : HANDLER)
+
   end
 
   module Build
@@ -69,11 +88,9 @@ struct
     include Sendreceive.Make(SR)
 
     let moduleOfEntryType (entryType:string) =
-      Belt_List.keep (!entries)
-        (fun (module E:Entry.S) -> entryType = E.name) |>
-      Belt_List.head
+      Belt_Map.String.get (!entries) entryType
 
-    let moduleOfEntryType_exn entryType =
+    let moduleOfEntryTypeExn entryType =
       match moduleOfEntryType entryType with
       | None -> failwith "no module for entry type"
       | Some m -> m
@@ -82,71 +99,71 @@ struct
       include G
 
       let validateCommit ~entryType ~entry ~package ~sources =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateCommit
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateCommit
           ~package
           ~sources
-          (E.convertType (entry : Js.Json.t))
+          (H.convertType (entry : Js.Json.t))
 
       let validatePut ~entryType ~entry ~header ~package ~sources =
-        let m =  moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validatePut
+        let m =  moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validatePut
           ~header
           ~package
           ~sources
-          (E.convertType entry)
+          (H.convertType entry)
 
       let validateMod ~entryType ~entry
           ~header ~replaces ~package ~sources =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateMod
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateMod
           ~header
           ~replaces
           ~package
           ~sources
-          (E.convertType entry)
+          (H.convertType entry)
 
       let validateDel ~entryType
           ~hash ~package ~sources =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateDel
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateDel
           ~hash
           ~package
           ~sources
 
       let validateLink ~entryType
           ~hash ~links ~package ~sources =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateLink
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateLink
           ~hash
           ~links
           ~package
           ~sources
 
       let validatePutPkg ~entryType =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validatePutPkg ()
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validatePutPkg ()
 
       let validateModPkg ~entryType =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateModPkg ()
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateModPkg ()
 
       let validateDelPkg ~entryType =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateDelPkg ()
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateDelPkg ()
 
       let validateLinkPkg ~entryType =
-        let m = moduleOfEntryType_exn entryType in
-        let module E = (val m : Entry.S) in
-        E.validateLinkPkg ()
+        let m = moduleOfEntryTypeExn entryType in
+        let module H = (val m : HANDLER) in
+        H.validateLinkPkg ()
     end
     include Callback
   end

@@ -1,9 +1,10 @@
 (** Implements a send and receive coupling for some particular
-    zome and input / utput types. 
+    zome and input / output types.
 *)
 
 open Types
 
+(** Base signature for send and receive functionality *)
 module type S0 =
 sig
   type input (** the arguments to [send] *)

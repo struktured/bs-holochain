@@ -3,45 +3,6 @@ module type S0 =
 sig
   include Named.S
   type t [@@bs.deriving abstract]
-
-  val validateCommit :
-    package:Js.Json.t ->
-    sources: string array ->
-    t ->
-    bool
-  val validatePut :
-    header:Js.Json.t ->
-    package:Js.Json.t ->
-    sources:string array ->
-    t ->
-    bool
-  val validateMod :
-    header:Js.Json.t ->
-    replaces:hashString ->
-    package:Js.Json.t ->
-    sources:string array ->
-    t ->
-    bool
-  val validateDel :
-    hash:hashString ->
-    package:Js.Json.t ->
-    sources:string array ->
-    bool
-  val validateLink :
-    hash:hashString ->
-    package:Js.Json.t ->
-    sources:string array ->
-    links:Js.Json.t array ->
-    bool
-
-  val validatePutPkg :
-    unit -> Js.Json.t
-  val validateModPkg :
-    unit -> Js.Json.t
-  val validateDelPkg :
-    unit -> Js.Json.t
-  val validateLinkPkg :
-    unit -> Js.Json.t
 end
 
 module type S = sig

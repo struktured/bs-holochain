@@ -8,7 +8,7 @@ module GetLinks = struct
     {hash:hashString;entryType:string;entry:Js.Json.t;source:hashString}
 
   let getLinks ?(tag:string option) ?(options:linkOptions option) ~base =
-    let entries = Raw.getLinks ?tag ?options ~base in
+    let entries = Native.getLinks ?tag ?options ~base in
     Array.map
       (fun entryInfo ->
          match Js.Json.decodeObject entryInfo with

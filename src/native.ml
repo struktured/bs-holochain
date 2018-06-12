@@ -171,7 +171,6 @@ external update : entryType:string -> entry:'a ->
  * Modifiedstatus on the DHT. Additionally the modification action will be
  * recorded in the entries' header in the local chain, which will be used by
  * validation routes. **)
-
 let update = update
 
 external query :

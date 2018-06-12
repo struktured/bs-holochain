@@ -9,7 +9,9 @@ module type S = sig
   include S0
   val convertType : Js.Json.t -> t
   val get : hashString -> options:Js.Json.t -> t
+  val commit : t -> hashString
   val makeHash : t -> hashString
+
 end
 
 module Make ( E : S0 ) : S with type t = E.t = struct

@@ -27,3 +27,17 @@ module Make ( E : S0 ) : S with type t = E.t = struct
 end
 
 
+let get (type t) (module E : S0 with type t = t) =
+  let module Entry = Make(E) in
+  Entry.get
+
+let makeHash (type t) (module E : S0 with type t = t) =
+  let module Entry = Make(E) in
+  Entry.makeHash
+
+let commit (type t) (module E : S0 with type t = t) =
+  let module Entry = Make(E) in
+  Entry.commit
+
+
+

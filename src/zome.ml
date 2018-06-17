@@ -7,7 +7,9 @@ module GetLinks = struct
   type packed =
     {hash:hashString;entryType:string;entry:Js.Json.t;source:hashString}
 
-  let getLinks ?(tag:string option) ?(options:linkOptions option) ~base =
+  let getLinks 
+      ?(tag:string option)
+      ?(options:LinkOptions.t option) ~base =
     let entries = Native.getLinks ?tag ?options ~base in
     Array.map
       (fun entryInfo ->

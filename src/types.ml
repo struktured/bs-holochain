@@ -4,16 +4,26 @@ module Named = struct
   module type S = sig val name : string end
 end
 
+type statusMask =
+  [`Live | `Deleted | `Reject] [@bs.int]
+
+(** TODO decide module scoping *)
+type getMask =
+  [`Entry | `EntryType | `Sources | `All]
+    [@bs.int] [@bs.module "HC"]
+
 type hashString = string
 
 (** Represents a link from an entry at [base] to hash [link]. [tag] is optional
     metadata for filtering and finding links.
 *)
-type link = {
-  base : hashString [@bs.as "Base"];
-  to_ : hashString [@bs.as "Link"];
-  tag : string option [@bs.as "Tag"];
-} [@@bs.deriving abstract]
+module Link = struct
+  type t = {
+    base : hashString [@bs.as "Base"];
+    to_ : hashString [@bs.as "Link"];
+    tag : string option [@bs.as "Tag"];
+  } [@@bs.deriving abstract]
+end
 
 (** Options for the getLinks function. If [load] is true
     a list of entrys is returned.
@@ -24,22 +34,34 @@ type link = {
     [statusMask] allows filtering of entries according to their
     status. One of [`Live | `Deleted | `Rejected].
 *)
-type linkOptions = {
-  load : bool [@bs.as "Load"];
-  statusMask :
-    [`Live | `Deleted | `Reject] [@bs.as "StatusMask"] [@bs.int]
-} [@@bs.deriving abstract]
+module LinkOptions =
+struct
+  type t = {
+    load : bool [@bs.as "Load"];
+    statusMask : statusMask
+  } [@@bs.deriving abstract]
 
-let defaultLinkOptions =
-  linkOptions ~load:false ~statusMask:`Live
+  let defaultLinkOptions =
+    t ~load:false ~statusMask:`Live
+end
 
-(** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
-    is [`To], [token] is non empty. *)
-type bridge =
-{
-  toApp : hashString;
-  side:([`From | `To] [@bs.int]);
-  token:string
-} [@@deriving bs.abstract]
+module Bridge =
+struct
+  (** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
+      is [`To], [token] is non empty. *)
+  type t =
+    {
+      toApp : hashString;
+      side:([`From | `To] [@bs.int]);
+      token:string
+    } [@@deriving bs.abstract]
+end
 
-
+module GetOptions = struct
+  type t = {
+    statusMask : statusMask [@bs.as "StatusMask"];
+    getMask : getMask [@bs.as "GetMask"];
+    local : bool [@bs.as "Local"];
+    bundle : bool [@bs.as "Bundle"];
+  } [@@deriving bs.abstract]
+end

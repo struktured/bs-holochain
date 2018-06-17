@@ -101,7 +101,7 @@ let bridge = bridge
 
 
 external getBridges :
-  unit -> bridge array = "getBridges" [@@bs.val]
+  unit -> Bridge.t array = "getBridges" [@@bs.val]
 
 (** This function allows your app to examine which bridges have been put in
 * place. *)
@@ -140,7 +140,8 @@ external get :
 let get = get
 
 external getLinks  :
-  base:hashString -> tag:string -> options:linkOptions option -> Js.Json.t array =
+  base:hashString -> tag:string ->
+  options:LinkOptions.t option -> Js.Json.t array =
   "" [@@bs.val]
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an

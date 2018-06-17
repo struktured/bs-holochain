@@ -16,7 +16,8 @@ type dht_config =
   {hashType:string (* TODO make enum *) } [@@bs.deriving abstract]
 
 type zome_function =
-  {name:string;callingTyping:string} (* TODO make enum *) [@@bs.deriving abstract]
+  {name:string;callingTyping:string} (* TODO make enum *)
+  [@@bs.deriving abstract]
 
 type zome_entry =
   {
@@ -24,7 +25,6 @@ type zome_entry =
     dataFormat: string;
     sharing: string
   } [@@bs.deriving abstract]
-
 
 type zome =
   {

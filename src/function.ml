@@ -7,6 +7,7 @@ open Types
 *)
 module type S0 =
 sig
+  module Zome : Named.S
   include Named.S
   type input
   type output
@@ -18,11 +19,16 @@ module type S = sig
   val call : input -> output
 end
 
-module Make (Z : Named.S) (T : S0) :
+module Make (T : S0) :
   S with type input = T.input with type output = T.output = struct
   include T
   external call :
     zomeName:string -> functionName:string -> input -> output = ""[@@bs.val]
-  let call args = call ~zomeName:Z.name ~functionName:T.name args
+  let call args = call ~zomeName:T.Zome.name ~functionName:T.name args
 end
 
+let call
+    (type input) (type output)
+    (module T:S0 with type input = input and type output = output) =
+  let module M = Make(T) in
+  M.call

@@ -107,9 +107,10 @@ external getBridges :
 * place. *)
 let getBridges = getBridges
 
+(* TODO unused - consider removing *)
 external get :
-  hashString -> options:'a -> Js.Json.t =
-  "get" [@@bs.val]
+  hashString -> options:GetOptions.t option -> Js.Json.t =
+  "" [@@bs.val]
 
 (** This function retrieves an entry from the local chain or the DHT. If
  * options.StatusMask is present, it determines which entries to return,

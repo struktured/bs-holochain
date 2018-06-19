@@ -27,6 +27,9 @@ module Make (T : S0) :
   let call args = call ~zomeName:T.Zome.name ~functionName:T.name args
 end
 
+(** [call (module T) args] calls function [T] with [args] in the zome as
+    described by [T.Zome].
+*)
 let call
     (type input) (type output)
     (module T:S0 with type input = input and type output = output) =

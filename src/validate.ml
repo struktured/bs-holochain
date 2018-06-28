@@ -17,18 +17,18 @@ module type S =
     bool
   val validateMod :
     header:Js.Json.t ->
-    replaces:hashString ->
+    replaces:t hashString ->
     package:Js.Json.t ->
     sources:string array ->
     t ->
     bool
   val validateDel :
-    hash:hashString ->
+    hash:t hashString ->
     package:Js.Json.t ->
     sources:string array ->
     bool
   val validateLink :
-    hash:hashString ->
+    hash:t hashString ->
     package:Js.Json.t ->
     sources:string array ->
     links:Js.Json.t array ->

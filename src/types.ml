@@ -12,16 +12,16 @@ type getMask =
   [`Entry | `EntryType | `Sources | `All]
     [@bs.int] [@bs.module "HC"]
 
-type hashString = string
+type 'entry hashString = string
 
 (** Represents a link from an entry at [base] to hash [link]. [tag] is optional
     metadata for filtering and finding links.
 *)
 module Link = struct
-  type t = {
-    base : hashString [@bs.as "Base"];
-    to_ : hashString [@bs.as "Link"];
-    tag : string option [@bs.as "Tag"];
+  type ('base, 'to_) t = {
+    base : 'base hashString [@bs.as "Base"];
+    to_ : 'to_ hashString [@bs.as "Link"];
+    tag : string option [@bs.as "Tag"]; (* TODO make polymorphic abstraction ? *)
   } [@@bs.deriving abstract]
 end
 
@@ -49,9 +49,9 @@ module Bridge =
 struct
   (** The type of a bridge. If side is [`From] then [toApp] is non empty. If side
       is [`To], [token] is non empty. *)
-  type t =
+  type 'entry t =
     {
-      toApp : hashString;
+      toApp : 'entry hashString;
       side:([`From | `To] [@bs.int]);
       token:string
     } [@@deriving bs.abstract]

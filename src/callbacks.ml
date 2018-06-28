@@ -11,8 +11,7 @@ module type REQUIRED = sig
    * information to the DHT to announce the presence of this new node. This
    * function must return true if it is to succeed, and the application to
    * start successfully. *)
-  val genesis : unit -> bool
-
+  include Genesis.S
 
   (** This function gets called when an entry is about to be committed to a
    * source chain. Use this function to describe the agreements about data as
@@ -44,7 +43,7 @@ module type REQUIRED = sig
     entryType:string (* enum? *) ->
     entry:Js.Json.t ->
     header:Js.Json.t ->
-    replaces:hashString ->
+    replaces:string ->
     package:Js.Json.t ->
     sources:string array -> bool
 
@@ -52,7 +51,7 @@ module type REQUIRED = sig
    * For more background, read the Validation Functions section. *)
   val validateDel :
     entryType:string (* enum? *) ->
-    hash:hashString ->
+    hash:string ->
     package:Js.Json.t ->
     sources:string array -> bool
 
@@ -65,7 +64,7 @@ module type REQUIRED = sig
    * more background, read the Validation Functions section. *)
   val validateLink:
     entryType:string (* enum? *) ->
-    hash:hashString ->
+    hash:string ->
     links:Js.Json.t array ->
     package:Js.Json.t ->
     sources:string array -> bool
@@ -116,7 +115,7 @@ module type OPTIONAL = sig
    * Zomes which want to call functions in other applications MAY define a
    * bridgeGenesis function and declare that they do so by setting the
    * Zome.BridgeTo value in their DNA. *)
-  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:hashString ->
+  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:[`Dna] hashString ->
     app_data:string -> bool
 
   (** This function gets called by the system when a message is received by a
@@ -124,6 +123,6 @@ module type OPTIONAL = sig
    * will be the result of the send function that sent the message. The value
    * you return from this function will be sent back to the node that sent you
    * the message. *)
-  val receive : hashString -> message:Js.Json.t -> options:Js.Json.t ->
+  val receive : [`Agent] hashString -> message:Js.Json.t -> options:Js.Json.t ->
     Js.Json.t
 end

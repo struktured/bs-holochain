@@ -10,8 +10,8 @@ external property : string -> Js.Json.t (*or_error *) = "property" [@@bs.val]
 let property = property
 
 external makeHash :
-  entryType:string -> entry:'a ->
-  hashString (*or_error *) = "makeHash" [@@bs.val]
+  entryType:string -> entry:'entry ->
+  'entry hashString (*or_error *) = "makeHash" [@@bs.val]
 
 (** Use this function to make a hash of the given entry data. This is the same
  * hash value that would be returned if entryData were passed to commit and by
@@ -50,8 +50,8 @@ let verifySignature = verifySignature
 
 external commit :
   entryType:string ->
-  entry:'a ->
-  hashString (*or_error*) =
+  entry:'entry ->
+  'entry hashString (*or_error*) =
   "" [@@bs.val]
 
 (** Attempts to commit an entry to your local source chain. It will cause
@@ -83,7 +83,7 @@ external call : zomeName:string -> functionName:string -> 'args ->
 let call = call
 
 external bridge :
-  appDnaHash:hashString ->
+  appDnaHash:'entry hashString ->
   zomeName:string ->
   functionName:string ->
   'arguments ->
@@ -101,7 +101,7 @@ let bridge = bridge
 
 
 external getBridges :
-  unit -> Bridge.t array = "getBridges" [@@bs.val]
+  unit -> 'entry Bridge.t array = "getBridges" [@@bs.val]
 
 (** This function allows your app to examine which bridges have been put in
 * place. *)
@@ -109,7 +109,7 @@ let getBridges = getBridges
 
 (* TODO unused - consider removing *)
 external get :
-  hashString -> options:GetOptions.t option -> Js.Json.t =
+  'entry hashString -> options:GetOptions.t option -> Js.Json.t =
   "" [@@bs.val]
 
 (** This function retrieves an entry from the local chain or the DHT. If
@@ -140,9 +140,11 @@ external get :
 *)
 let get = get
 
-external getLinks  :
-  base:hashString -> tag:string ->
-  options:LinkOptions.t option -> Js.Json.t array =
+external getLinks :
+  base:'entry hashString ->
+  tag:string ->
+  options:LinkOptions.t option ->
+  Js.Json.t array =
   "" [@@bs.val]
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an
@@ -156,7 +158,7 @@ external getLinks  :
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
 let getLinks ?(tag="") ?options = getLinks ~tag ~options
 
-external remove : entry:Js.Json.t -> message:string -> hashString =
+external remove : entry:Js.Json.t -> message:string -> 'entry hashString =
   "" [@@bs.val]
 
 
@@ -249,7 +251,7 @@ external query :
 let query = query
 
 external updateAgent :
-  options: 'a -> hashString (* or-error *) = "" [@@bs.val]
+  options: 'a -> 'entry hashString (* or-error *) = "" [@@bs.val]
 
 (** Commits a new agent entry to the chain, with either or both new identity
  * information or a new public key, while revoking the old key. If revoking a
@@ -266,7 +268,7 @@ external updateAgent :
 *)
 let updateAgent = updateAgent
 
-external send : hashString -> message:'a -> options:'a ->
+external send : 'entry hashString -> message:'a -> options:'a ->
   Js.Json.t = "" [@@bs.val]
 
 (** Sends a message to a node, using the App.Key.Hash of that node, its

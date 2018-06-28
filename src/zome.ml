@@ -5,9 +5,9 @@ module type S0 = Named.S
 module GetLinks = struct
 
   type packed =
-    {hash:hashString;entryType:string;entry:Js.Json.t;source:hashString}
+    {hash:string;entryType:string;entry:Js.Json.t;source:[`Agent] hashString}
 
-  let getLinks 
+  let getLinks
       ?(tag:string option)
       ?(options:LinkOptions.t option) ~base =
     let entries = Native.getLinks ?tag ?options ~base in
@@ -18,7 +18,7 @@ module GetLinks = struct
            Js.log2 "unexpected link info shape:" entryInfo;
            failwith "unexpected link info shape"
          | Some dict ->
-           let hash:hashString =
+           let hash =
              Belt_Option.getExn (Js.Dict.get dict "Hash") |>
              Js.Json.stringify in
            (match Belt_Option.map
@@ -27,7 +27,7 @@ module GetLinks = struct
            | Some entryType ->
              let entry = Belt_Option.getExn
                  (Js.Dict.get dict "Entry") in
-             let source : hashString =
+             let source =
                Belt_Option.getExn (Js.Dict.get dict "Source") |>
                Js.Json.stringify in
              `Packed {hash; entryType; entry; source}
@@ -35,7 +35,8 @@ module GetLinks = struct
       )
       entries
 
-  type 'a unpacked = {entry:'a;source:hashString;hash:hashString}
+  type 'entry unpacked =
+    {entry:'entry;source:[`Agent] hashString;hash:'entry hashString}
 
   let unpack
       (type entry)
@@ -43,10 +44,11 @@ module GetLinks = struct
       links : entry unpacked array =
     Belt_Array.keepMap links
       (function
-        | `Hash (_hash:hashString) -> None
+        | `Hash (_hash:string) -> None
         | `Packed {hash;entryType;entry;source} ->
           match entryType = E.name with
-          | true -> Some {source;entry=E.convertType entry;hash}
+          | true -> Some {source;entry=E.convertType entry;
+                          hash=E.hashOfString hash}
           | false -> None
       )
 
@@ -84,7 +86,7 @@ struct
   end
 
   module Build
-      (G : sig val genesis : unit -> bool end)
+      (G : Genesis.S)
       (SR : Sendreceive.S0) =
   struct
     include Sendreceive.Make(SR)
@@ -109,7 +111,7 @@ struct
           (H.convertType (entry : Js.Json.t))
 
       let validatePut ~entryType ~entry ~header ~package ~sources =
-        let m =  moduleOfEntryTypeExn entryType in
+        let m = moduleOfEntryTypeExn entryType in
         let module H = (val m : HANDLER) in
         H.validatePut
           ~header
@@ -118,9 +120,10 @@ struct
           (H.convertType entry)
 
       let validateMod ~entryType ~entry
-          ~header ~replaces ~package ~sources =
+          ~header ~(replaces:string) ~package ~sources =
         let m = moduleOfEntryTypeExn entryType in
         let module H = (val m : HANDLER) in
+        let replaces = H.hashOfString replaces in
         H.validateMod
           ~header
           ~replaces
@@ -129,18 +132,20 @@ struct
           (H.convertType entry)
 
       let validateDel ~entryType
-          ~hash ~package ~sources =
+          ~(hash:string) ~package ~sources =
         let m = moduleOfEntryTypeExn entryType in
         let module H = (val m : HANDLER) in
+        let hash = H.hashOfString hash in
         H.validateDel
           ~hash
           ~package
           ~sources
 
       let validateLink ~entryType
-          ~hash ~links ~package ~sources =
+          ~(hash:string) ~links ~package ~sources =
         let m = moduleOfEntryTypeExn entryType in
         let module H = (val m : HANDLER) in
+        let hash = H.hashOfString hash in
         H.validateLink
           ~hash
           ~links

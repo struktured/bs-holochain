@@ -17,19 +17,19 @@ sig
       It may use other native holochain functions to accomplish, including
       mutating operations.
   *)
-  val receive : hashString -> input -> output
+  val receive : [`Agent] hashString -> input -> output
 end
 
 module type S = sig
   include S0
-  val send : hashString -> input -> output
+  val send : [`Agent] hashString -> input -> output
 end
 
 module Make (T : S0) :
   S with type input = T.input with type output = T.output =
 struct
   include T
-  external send : hashString -> input -> output = "" [@@bs.val]
+  external send : [`Agent] hashString -> input -> output = "" [@@bs.val]
   let send = send
 end
 

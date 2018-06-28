@@ -115,7 +115,7 @@ module type OPTIONAL = sig
    * Zomes which want to call functions in other applications MAY define a
    * bridgeGenesis function and declare that they do so by setting the
    * Zome.BridgeTo value in their DNA. *)
-  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:[`Dna] hashString ->
+  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:[`DNA] hashString ->
     app_data:string -> bool
 
   (** This function gets called by the system when a message is received by a

@@ -43,7 +43,7 @@ module App = struct
     (** Holds the unique identifier of this Holochain's DNA.
        Nodes must run the same DNA to be on the same Holochain.
      * *)
-    external hash : [`Dna] hashString =
+    external hash : [`DNA] hashString =
       "Hash" [@@bs.module "App.DNA"] [@@bs.val]
     let hash = hash
   end

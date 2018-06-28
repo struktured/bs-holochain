@@ -8,13 +8,13 @@ open Types
 module type S0 =
 sig
   include Named.S
-  type t [@@bs.deriving abstract]
+  type t
 end
 
 module type S = sig
   include S0
   val convertType : Js.Json.t -> t
-  val get : ?options:GetOptions.t -> t hashString -> t
+  val get : ?options:GetOptions.t -> t hashString -> t option
   val commit : t -> t hashString
   val makeHash : t -> t hashString
   val hashOfString : string -> t hashString
@@ -23,7 +23,8 @@ end
 module Make ( E : S0 ) : S with type t = E.t = struct
   include E
   external convertType : Js.Json.t -> t = "%identity"
-  external get : t hashString -> options:GetOptions.t option -> t = "" [@@bs.val]
+  external get : t hashString -> options:GetOptions.t option -> t option = ""
+    [@@bs.val] [@@bs.return nullable]
   external makeHash : entryType:string -> t -> t hashString = "" [@@bs.val]
   external commit : entryType:string -> t -> t hashString = "" [@@bs.val]
   let makeHash = makeHash ~entryType:name

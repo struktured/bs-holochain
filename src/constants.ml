@@ -58,7 +58,7 @@ module App = struct
      * second entry (identity info) on your chain. **)
     let hash = hash
 
-    external topHash : [`Top] = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
+    external topHash : [`Top] hashString = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
 
     (** Holds the most recent agent indentity entry that has been committed to
      * the chain. To start with its value is equivalent to App.Agent.Hash after
@@ -78,7 +78,7 @@ module App = struct
 
   (** Holochain's Key related constants *)
   module Key = struct
-   external hash : string = "Hash" [@@bs.module "App.DNA"] [@@bs.val]
+    external hash : [`Public_key] hashString = "Hash" [@@bs.module "App.DNA"] [@@bs.val]
 
    (* Holds the hash of your public key. This is your node address on the DHT.
     * It can be used for node-to-node messaging with send and receive

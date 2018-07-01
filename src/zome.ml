@@ -29,7 +29,8 @@ module GetLinks = struct
                  (Js.Dict.get dict "Entry") in
              let source =
                Belt_Option.getExn (Js.Dict.get dict "Source") |>
-               Js.Json.stringify in
+               Js.Json.stringify |>
+               HashString.create in
              `Packed {hash; entryType; entry; source}
            )
       )

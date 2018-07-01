@@ -12,7 +12,19 @@ type getMask =
   [`Entry | `EntryType | `Sources | `All]
     [@bs.int] [@bs.module "HC"]
 
-type 'entry hashString = string
+module HashString : sig
+  type 'entry t = private string
+  (** Manually lift a string to a hash string type. Only should be used as a last resort.
+      Insteaad, use the entry module level version or those in the constants module
+   *)
+  val create : string -> 'entry t
+  end =
+struct
+  type 'entry t = string
+  let create s : 'entry t = s
+end
+
+type 'entry hashString = 'entry HashString.t
 
 (** Represents a link from an entry at [base] to hash [link]. [tag] is optional
     metadata for filtering and finding links.

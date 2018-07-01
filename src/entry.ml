@@ -32,7 +32,8 @@ module Make ( E : S0 ) : S with type t = E.t = struct
   let get ?options hashString = get hashString ~options
   let commit = commit ~entryType:E.name
 
-  let hashOfString (s:string) : t hashString = s
+  let hashOfString (s:string) : t hashString =
+    HashString.create s
 end
 
 

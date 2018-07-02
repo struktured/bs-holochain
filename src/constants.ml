@@ -28,7 +28,8 @@ module System = struct
   type bridge = [`From | `To] [@@bs.module "HC"] [@@bs.enum]
 
   type sysEntryType =
-    [`DNA|`Agent|`Key|`Headers|`Del] [@@bs.module "HC"] [@@bs.enum]
+    [`DNA| `Agent| `Key | `Headers| `Del]
+  [@@bs.module "HC"] [@@bs.enum]
 end
 
 (** Holochain application constants *)
@@ -43,28 +44,28 @@ module App = struct
     (** Holds the unique identifier of this Holochain's DNA.
        Nodes must run the same DNA to be on the same Holochain.
      * *)
-    external hash : [`DNA] hashString =
+    external hash : string =
       "Hash" [@@bs.module "App.DNA"] [@@bs.val]
-    let hash = hash
+    let hash : [`DNA] hashString = HashString.create hash
   end
 
   (** Holochain's Agent related constants *)
   module Agent = struct
 
-    external hash : [`Agent] hashString =
+    external hash : string =
       "Hash" [@@bs.module "App.Agent"] [@@bs.val]
 
     (** Holds your peer's identity info on the DHT. This is the hash for the
      * second entry (identity info) on your chain. **)
-    let hash = hash
+    let hash : [`Agent] hashString = HashString.create hash
 
-    external topHash : [`Top] hashString = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
+    external topHash : string = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
 
     (** Holds the most recent agent indentity entry that has been committed to
      * the chain. To start with its value is equivalent to App.Agent.Hash after
      * a call to updateAgent it will have the value of the newly committed
      * agent entry. *)
-    let topHash = topHash
+    let topHash : [`Top] hashString = HashString.create topHash
 
     external string : string = "String" [@@bs.module "App.Agent"] [@@bs.val]
 
@@ -78,12 +79,12 @@ module App = struct
 
   (** Holochain's Key related constants *)
   module Key = struct
-    external hash : [`Public_key] hashString = "Hash" [@@bs.module "App.DNA"] [@@bs.val]
+    external hash : string = "Hash" [@@bs.module "App.DNA"] [@@bs.val]
 
    (* Holds the hash of your public key. This is your node address on the DHT.
     * It can be used for node-to-node messaging with send and receive
     * functions. *)
-   let hash = hash
+    let hash : [`Key] hashString = HashString.create hash
  end
 
 end

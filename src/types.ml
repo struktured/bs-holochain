@@ -18,10 +18,14 @@ module HashString : sig
       Insteaad, use the entry module level version or those in the constants module
    *)
   val create : string -> 'entry t
-  end =
+  val equals : 'entry t -> 'entry t -> bool
+  val hashEquals : 'entry t -> 'entry' t -> bool
+   end =
 struct
   type 'entry t = string
   let create s : 'entry t = s
+  let hashEquals = (=)
+  let equals = hashEquals
 end
 
 type 'entry hashString = 'entry HashString.t

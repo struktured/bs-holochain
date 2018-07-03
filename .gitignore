@@ -25,3 +25,4 @@
 .merlin
 .bsb.lock
 node_modules
+yarn-error.log

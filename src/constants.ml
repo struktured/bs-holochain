@@ -5,10 +5,13 @@ module System = struct
   external version :
     string = "Version" [@@bs.module "HC"] [@@bs.val]
   let version = version
-  external hashNotFound :
-    [`Hash_not_found] hashString = "HashNotFound" [@@bs.module "HC"] [@@bs.val]
 
-  let hashNotFound = hashNotFound
+  external hashNotFound : string
+    = "HashNotFound" [@@bs.module "HC"] [@@bs.val]
+
+  let hashNotFound : [`Hash_not_found] hashString =
+    HashString.create hashNotFound
+
   type status =
     [`Live | `Deleted | `Modified | `Rejected | `Any]
   [@@bs.module "HC"] [@@bs.enum]
@@ -28,8 +31,7 @@ module System = struct
   type bridge = [`From | `To] [@@bs.module "HC"] [@@bs.enum]
 
   type sysEntryType =
-    [`DNA| `Agent| `Key | `Headers| `Del]
-  [@@bs.module "HC"] [@@bs.enum]
+    [`DNA| `Agent| `Key | `Headers| `Del] [@@bs.enum]
 end
 
 (** Holochain application constants *)
@@ -46,7 +48,9 @@ module App = struct
      * *)
     external hash : string =
       "Hash" [@@bs.module "App.DNA"] [@@bs.val]
-    let hash : [`DNA] hashString = HashString.create hash
+
+    type hash = [`DNA] Types.hashString
+    let hash : hash = HashString.create hash
   end
 
   (** Holochain's Agent related constants *)
@@ -55,9 +59,11 @@ module App = struct
     external hash : string =
       "Hash" [@@bs.module "App.Agent"] [@@bs.val]
 
+    type hash = [`Agent] Types.hashString
+ 
     (** Holds your peer's identity info on the DHT. This is the hash for the
      * second entry (identity info) on your chain. **)
-    let hash : [`Agent] hashString = HashString.create hash
+    let hash : hash = HashString.create hash
 
     external topHash : string = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
 
@@ -65,7 +71,7 @@ module App = struct
      * the chain. To start with its value is equivalent to App.Agent.Hash after
      * a call to updateAgent it will have the value of the newly committed
      * agent entry. *)
-    let topHash : [`Top] hashString = HashString.create topHash
+    let topHash : [`Top] Types.hashString = HashString.create topHash
 
     external string : string = "String" [@@bs.module "App.Agent"] [@@bs.val]
 
@@ -84,7 +90,8 @@ module App = struct
    (* Holds the hash of your public key. This is your node address on the DHT.
     * It can be used for node-to-node messaging with send and receive
     * functions. *)
-    let hash : [`Key] hashString = HashString.create hash
+    type hash = [`Key] hashString
+    let hash : hash = HashString.create hash
  end
 
 end

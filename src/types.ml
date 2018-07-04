@@ -13,7 +13,7 @@ type getMask =
     [@bs.int] [@bs.module "HC"]
 
 module HashString : sig
-  type 'entry t = private string
+  type 'entry t = string
   (** Manually lift a string to a hash string type. Only should be used as a last resort.
       Insteaad, use the entry module level version or those in the constants module
    *)

@@ -1,3 +1,4 @@
+open Constants
 (** Implements a send and receive coupling for some particular
     zome and input / output types.
 *)
@@ -17,19 +18,19 @@ sig
       It may use other native holochain functions to accomplish, including
       mutating operations.
   *)
-  val receive : [`Agent] hashString -> input -> output
+  val receive : App.Agent.hash -> input -> output
 end
 
 module type S = sig
   include S0
-  val send : [`Agent] hashString -> input -> output
+  val send : App.Agent.hash -> input -> output
 end
 
 module Make (T : S0) :
   S with type input = T.input with type output = T.output =
 struct
   include T
-  external send : [`Agent] hashString -> input -> output = "" [@@bs.val]
+  external send : App.Agent.hash -> input -> output = "" [@@bs.val]
   let send = send
 end
 

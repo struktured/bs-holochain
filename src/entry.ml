@@ -18,6 +18,8 @@ module type S = sig
   val commit : t -> t hashString
   val makeHash : t -> t hashString
   val hashOfString : string -> t hashString
+
+  val to_json : t -> Js.Json.t
 end
 
 module Make ( E : S0 ) : S with type t = E.t = struct
@@ -31,6 +33,8 @@ module Make ( E : S0 ) : S with type t = E.t = struct
   let convertType = convertType
   let get ?options hashString = get hashString ~options
   let commit = commit ~entryType:E.name
+
+  external to_json : t -> Js.Json.t = "%identity"
 
   let hashOfString (s:string) : t hashString =
     HashString.create s

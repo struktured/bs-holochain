@@ -50,7 +50,7 @@ module App = struct
       "Hash" [@@bs.module "App.DNA"] [@@bs.val]
 
     type hash = [`DNA] Types.hashString
-    let hash : hash = HashString.create hash
+    let hash : hash = (HashString.create hash :> hash)
   end
 
   (** Holochain's Agent related constants *)
@@ -63,7 +63,7 @@ module App = struct
  
     (** Holds your peer's identity info on the DHT. This is the hash for the
      * second entry (identity info) on your chain. **)
-    let hash : hash = HashString.create hash
+    let hash : hash = (HashString.create hash :> hash)
 
     external topHash : string = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
 
@@ -91,7 +91,7 @@ module App = struct
     * It can be used for node-to-node messaging with send and receive
     * functions. *)
     type hash = [`Key] hashString
-    let hash : hash = HashString.create hash
+    let hash : hash = (HashString.create hash :> hash)
  end
 
 end

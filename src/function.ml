@@ -1,4 +1,3 @@
-open Types
 (** A zome funtion with strict input and output type definitions.
     Their must be a exported function equal to the [name] field or you
     will experience runtime errors.

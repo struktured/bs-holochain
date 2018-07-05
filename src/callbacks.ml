@@ -1,4 +1,4 @@
-open Types
+open Constants
 
 (** Required callback functions *)
 module type REQUIRED = sig
@@ -115,14 +115,14 @@ module type OPTIONAL = sig
    * Zomes which want to call functions in other applications MAY define a
    * bridgeGenesis function and declare that they do so by setting the
    * Zome.BridgeTo value in their DNA. *)
-  val bridgeGenesis : side:([`From|`To] [@bs.int]) -> dna:[`DNA] hashString ->
-    app_data:string -> bool
+  val bridgeGenesis : side:System.Bridge.t -> dna:App.DNA.hash ->
+    appData:string -> bool
 
   (** This function gets called by the system when a message is received by a
    * node. The return value of the function will be sent back to the sender and
    * will be the result of the send function that sent the message. The value
    * you return from this function will be sent back to the node that sent you
    * the message. *)
-  val receive : [`Agent] hashString -> message:Js.Json.t -> options:Js.Json.t ->
+  val receive : App.Agent.hash -> message:Js.Json.t -> options:Js.Json.t ->
     Js.Json.t
 end

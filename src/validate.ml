@@ -1,5 +1,4 @@
 (** Validation callback api, but only for a specific entry type *)
-open Types
 
 module type S =
   sig
@@ -18,18 +17,18 @@ module type S =
     bool
   val validateMod :
     header:Js.Json.t ->
-    replaces:t hashString ->
+    replaces:t HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     t ->
     bool
   val validateDel :
-    hash:t hashString ->
+    hash:t HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     bool
   val validateLink :
-    hash:t hashString ->
+    hash:t HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     links:Js.Json.t array ->
@@ -60,18 +59,18 @@ class type ['entry] validate =
     bool
   method validateMod :
     header:Js.Json.t ->
-    replaces:'entry hashString ->
+    replaces:'entry HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     'entry ->
     bool
   method validateDel :
-    hash:'entry hashString ->
+    hash:'entry HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     bool
   method validateLink :
-    hash:'entry hashString ->
+    hash:'entry HashString.t ->
     package:Js.Json.t ->
     sources:string array ->
     links:Js.Json.t array ->

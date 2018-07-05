@@ -3,8 +3,6 @@ open Constants
     zome and input / output types.
 *)
 
-open Types
-
 (** Base signature for send and receive functionality *)
 module type S0 =
 sig

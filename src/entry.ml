@@ -26,6 +26,8 @@ module type S = sig
   val makeHash : t -> t HashString.t
   val hashOfString : string -> t HashString.t
   val update : t -> t HashString.t -> t HashString.t
+  val remove : ?message:string -> t HashString.t -> t HashString.t
+
   (** [toJson t] converts the entry [t] to a json structure. *)
   val toJson : t -> Js.Json.t
 end
@@ -39,6 +41,8 @@ module Make ( E : S0 ) : S with type t = E.t = struct
   external commit : entryType:string -> t -> t HashString.t = "" [@@bs.val]
   external update :
     entryType:string -> t -> t HashString.t -> t HashString.t = "" [@@bs.val]
+  external remove :
+    t HashString.t -> message:string option -> t HashString.t = "" [@@bs.val]
   external toJson : t -> Js.Json.t = "%identity"
 
   let makeHash = makeHash ~entryType:name
@@ -47,7 +51,8 @@ module Make ( E : S0 ) : S with type t = E.t = struct
   let commit = commit ~entryType:E.name
   let update entry oldHash =
     update ~entryType:E.name entry oldHash
-
+  let remove ?message h =
+    remove h ~message
   let hashOfString (s:string) : t HashString.t =
     HashString.create s
 end

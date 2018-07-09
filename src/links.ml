@@ -8,15 +8,32 @@ module Link = struct
     base : 'base HashString.t [@bs.as "Base"];
     link : 'link HashString.t [@bs.as "Link"];
     tag : string option [@bs.as "Tag"];
-    linkAction : System.LinkAction.t 
+    linkAction : System.LinkAction.t option [@bs.as "LinkAction"]
   } [@@bs.deriving abstract]
+
+  let t ?tag ?linkAction ~base ~link () =
+    t ~tag ~linkAction ~base ~link
 end
 
 
 (** Special entry type for links *)
-type ('base, 'link) t =
-  {links:('base, 'link) Link.t array [@bs.as "Link"]}
+type t =
+  {links:([`Any], [`Any]) Link.t array [@bs.as "Links"]}
 [@@bs.deriving abstract]
+
+let t links : t =
+  t ~links:
+  (Belt_Array.map links
+    (fun (l:('a, 'b) Link.t) ->
+      Link.t
+        (* TODO figure out better wayt to do this *)
+       ~base:(Link.base l :> [`Any] HashString.t)
+       ~link:(Link.link l :> [`Any] HashString.t)
+       ?tag:(Link.tag l)
+       ?linkAction:(Link.linkAction l)
+       ()
+    )
+  )
 
 
 (** Options for the getLinks function. If [load] is true

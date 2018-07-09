@@ -6,7 +6,7 @@ module GetOptions = struct
     getMask : System.GetMask.t [@bs.as "GetMask"];
     local : bool [@bs.as "Local"];
     bundle : bool [@bs.as "Bundle"];
-  } [@@deriving bs.abstract]
+  } [@@bs.deriving abstract]
 end
 (**
    {1} Entry definitions and functors.
@@ -25,9 +25,9 @@ module type S = sig
   val commit : t -> t HashString.t
   val makeHash : t -> t HashString.t
   val hashOfString : string -> t HashString.t
-
-  (** [to_json t] converts the entry [t] to a json structure. *)
-  val to_json : t -> Js.Json.t
+  val update : t -> t HashString.t -> t HashString.t
+  (** [toJson t] converts the entry [t] to a json structure. *)
+  val toJson : t -> Js.Json.t
 end
 
 module Make ( E : S0 ) : S with type t = E.t = struct
@@ -37,12 +37,16 @@ module Make ( E : S0 ) : S with type t = E.t = struct
     [@@bs.val] [@@bs.return nullable]
   external makeHash : entryType:string -> t -> t HashString.t = "" [@@bs.val]
   external commit : entryType:string -> t -> t HashString.t = "" [@@bs.val]
+  external update :
+    entryType:string -> t -> t HashString.t -> t HashString.t = "" [@@bs.val]
+  external toJson : t -> Js.Json.t = "%identity"
+
   let makeHash = makeHash ~entryType:name
   let convertType = convertType
   let get ?options hashString = get hashString ~options
   let commit = commit ~entryType:E.name
-
-  external to_json : t -> Js.Json.t = "%identity"
+  let update entry oldHash =
+    update ~entryType:E.name entry oldHash
 
   let hashOfString (s:string) : t HashString.t =
     HashString.create s

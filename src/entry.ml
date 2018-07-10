@@ -7,6 +7,12 @@ module GetOptions = struct
     local : bool [@bs.as "Local"];
     bundle : bool [@bs.as "Bundle"];
   } [@@bs.deriving abstract]
+
+  let t ?(statusMask=System.Status.live)
+        ?(getMask=System.GetMask.default)
+        ?(local=false)
+        ?(bundle=false) () =
+    t ~statusMask ~getMask ~local ~bundle
 end
 (**
    {1} Entry definitions and functors.

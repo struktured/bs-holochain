@@ -1,39 +1,69 @@
+(**
+ * A minimally defined Zome is just a named entity.
+ *)
 module type S0 = Named.S
 
-module Builder () =
-struct
 
-  module type HANDLER = sig
+(** A validation handler for a particular entry module *)
+module type HANDLER =
+sig
     include Entry.S
     include Validate.S with type t := t
-  end
+end
 
+(** Builder to produce a zome. *)
+module Builder (Z:S0) =
+struct
 
   let entries : (module HANDLER) Belt_Map.String.t ref
     = ref Belt_Map.String.empty
 
-  module Add
+  module Handler(Handler:HANDLER) =
+  struct
+    include (Handler : Entry.S with type t = Handler.t)
+    let () = entries :=
+        Belt_Map.String.set
+          (!entries) Handler.name
+          (module Handler : HANDLER)
+  end
+
+  module Entry0
       (E0 : Entry.S0)
       (V : Validate.S with type t = E0.t) :
     Entry.S with type t = E0.t = struct
     module E = Entry.Make(E0)
-    module Handler : HANDLER with type t = E.t =
-      struct
-        include (E : Entry.S with type t = E.t)
-        include (V : Validate.S with type t := t)
-      end
-    include (E : Entry.S with type t = E0.t)
-    let () = entries :=
-        Belt_Map.String.set
-          (!entries) E0.name
-          (module Handler : HANDLER)
+    module H : HANDLER with type t = E.t =
+    struct
+      include (E : Entry.S with type t = E.t)
+      include (V : Validate.S with type t := t)
+    end
+    include Handler(H)
+  end
 
+  module Entry
+      (E : Entry.S)
+      (V : Validate.S with type t = E.t) :
+    Entry.S with type t = E.t = struct
+    module H : HANDLER with type t = E.t =
+    struct
+      include (E : Entry.S with type t = E.t)
+      include (V : Validate.S with type t := t)
+    end
+    include Handler(H)
+  end
+
+  module type S = sig
+    include S0
+    include Sendreceive.S
+    include Callbacks.REQUIRED
   end
 
   module Build
       (G : Genesis.S)
-      (SR : Sendreceive.S0) =
+      (SR : Sendreceive.S0) :
+    S with type input = SR.input and type output = SR.output =
   struct
+    include Z
     include Sendreceive.Make(SR)
 
     let moduleOfEntryType (entryType:string) =

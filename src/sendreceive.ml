@@ -19,11 +19,15 @@ sig
   val receive : App.Agent.hash -> input -> output
 end
 
+(** A sender and receiver pair. The [input] and [output] types are fixed
+    and scoped to a particular zome.
+*)
 module type S = sig
   include S0
   val send : App.Agent.hash -> input -> output
 end
 
+(** Makes a sender and receiver pair given the receiver callback module. *)
 module Make (T : S0) :
   S with type input = T.input with type output = T.output =
 struct
@@ -32,4 +36,6 @@ struct
   let send = send
 end
 
-
+(** A minimal [SendReceive.S] implementation which accepts unit and returns unit. *)
+module Unit : S with type input = unit and type output = unit =
+  Make(struct type input = unit type output = unit let receive _ () = () end)

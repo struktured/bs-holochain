@@ -2,12 +2,11 @@
 
 (** {2} Holochain system constants *)
 module System = struct
-  external version :
-    string = "Version" [@@bs.module "HC"] [@@bs.val]
+  let version :
+    string = [%raw {|HC.Version|}]
   let version = version
 
-  external hashNotFound : string =
-    "HashNotFound" [@@bs.module "HC"] [@@bs.val]
+  let hashNotFound : string = [%raw {|HC.HashNotFound|}]
 
   type hashNotFound = [`Hash_not_found] HashString.t
 
@@ -25,11 +24,11 @@ module System = struct
   end =
   struct
     type t = int
-    external live : t = "Live" [@@bs.module "HC.Status"] [@@bs.val]
-    external deleted : t = "Deleted" [@@bs.module "HC.Status"] [@@bs.val]
-    external modified : t = "Modified" [@@bs.module "HC.Status"] [@@bs.val]
-    external rejected : t = "Rejected" [@@bs.module "HC.Status"] [@@bs.val]
-    external any : t = "Any" [@@bs.module "HC.Status"] [@@bs.val]
+    let live : t = [%raw {|HC.Status.Live|}]
+    let deleted : t = [%raw {|HC.Status.Deleted|}]
+    let modified : t = [%raw {|HC.Status.Modified|}]
+    let rejected : t = [%raw {|HC.Status.Rejected|}]
+    let any : t = [%raw {|HC.Status.Any|}]
   end
 
   module GetMask :
@@ -44,11 +43,11 @@ module System = struct
   struct
     type t = int
 
-    external default : t = "Default" [@@bs.module "HC.GetMask"] [@@bs.val]
-    external entry : t = "Entry" [@@bs.module "HC.GetMask"] [@@bs.val]
-    external entryType : t = "EntryType" [@@bs.module "HC.GetMask"] [@@bs.val]
-    external sources : t = "Sources" [@@bs.module "HC.GetMask"] [@@bs.val]
-    external all : t = "All" [@@bs.module "HC.GetMask"] [@@bs.val]
+    let default : t = [%raw {|HC.GetMask.Default|}]
+    let entry : t = [%raw {|HC.GetMask.Entry|}]
+    let entryType : t = [%raw {|HC.GetMask.EntryType|}]
+    let sources : t = [%raw {|HC.GetMask.Sources|}]
+    let all : t = [%raw {|HC.GetMask.All|}]
   end
 
   module LinkAction :
@@ -59,8 +58,8 @@ module System = struct
   end
   = struct
       type t = int
-      external add : t = "Add" [@@bs.module "HC.LinkAction"] [@@bs.val]
-      external del : t = "Del" [@@bs.module "HC.LinkAction"] [@@bs.val]
+      let add : t = [%raw {|HC.LinkAction.Add|}]
+      let del : t = [%raw {|HC.LinkAction.Del|}]
   end
 
   module PkgReq :
@@ -71,25 +70,28 @@ module System = struct
     val entryTypes : t
   end = struct
     type t = int
-    external chain : t = "Chain" [@@bs.module "HC.PkgReq"] [@@bs.val]
-    external chainOpt : t = "ChainOpt" [@@bs.module "HC.PkgReq"] [@@bs.val]
-    external entryTypes : t = "ChainOpt" [@@bs.module "HC.PkgReq"] [@@bs.val]
+    let chain : t = [%raw {|HC.PkgReq.Chain|}]
+    let chainOpt : t = [%raw {|HC.PkgReq.ChainOpt|}]
+    let entryTypes : t = [%raw {|HC.PkgReq.Entries|}]
   end
 
   module ChainOpt :
   sig
     type t
-    val chain : t
-    val chainOpt : t
-    val entryTypes : t
+    val none : t
+    val headers : t
+    val entries : t
+    val full : t
   end = struct
     type t = int
-    external chain :
-      t = "Chain" [@@bs.module "HC.PkgReq.ChainOpt"] [@@bs.val]
-    external chainOpt :
-      t = "ChainOpt" [@@bs.module "HC.PkgReq.ChainOpt"] [@@bs.val]
-    external entryTypes :
-      t = "ChainOpt" [@@bs.module "HC.PkgReq.EntryTypes"] [@@bs.val]
+    let none :
+      t = [%raw {|HC.PkgReq.ChainOpt.None|}]
+    let headers :
+      t = [%raw {|HC.PkgReq.ChainOpt.Headers|}]
+    let entries :
+      t = [%raw {|HC.PkgReq.ChainOpt.Entries|}]
+     let full :
+      t = [%raw {|HC.PkgReq.ChainOpt.Full|}]
   end
 
 
@@ -100,8 +102,8 @@ module System = struct
     val to_ : t
   end = struct
     type t = int
-    external from : t = "From" [@@bs.module "HC.Bridge"] [@@bs.val]
-    external to_ : t = "To" [@@bs.module "HC.Bridge"] [@@bs.val]
+    let from : t = [%raw {|HC.Bridge.From|}]
+    let to_ : t = [%raw {|HC.Bridge.To|}]
   end
 
   module SysEntryType :
@@ -115,11 +117,11 @@ module System = struct
   end =
   struct
     type t = int
-    external dna : t = "DNA" [@@bs.module "HC.SysEntryType"] [@@bs.val]
-    external agent : t = "Agent" [@@bs.module "HC.SysEntryType"] [@@bs.val]
-    external key : t = "Key" [@@bs.module "HC.SysEntryType"] [@@bs.val]
-    external headers : t = "Headers" [@@bs.module "HC.SysEntryType"] [@@bs.val]
-    external del : t = "Del" [@@bs.module "HC.SysEntryType"] [@@bs.val]
+    let dna : t = [%raw {|HC.SysEntryType.DNA|}]
+    let agent : t = [%raw {|HC.SysEntryType.Agent|}]
+    let key : t = [%raw {|HC.SysEntryType.Key|}]
+    let headers : t = [%raw {|HC.SysEntryType.Headers|}]
+    let del : t = [%raw {|HC.SysEntryType.Del|}]
   end
 
 end
@@ -128,7 +130,7 @@ end
 module App = struct
 
   (** Holds the Name of this Holochain from the DNA. *)
-  external name : string = "name" [@@bs.module "App"] [@@bs.val]
+  let name : string = [%raw {|App.Name|}]
   let name = name
 
   (** Holochain's DNA related constants *)
@@ -136,8 +138,7 @@ module App = struct
     (** Holds the unique identifier of this Holochain's DNA.
        Nodes must run the same DNA to be on the same Holochain.
      * *)
-    external hash : string =
-      "Hash" [@@bs.module "App.DNA"] [@@bs.val]
+    let hash : string = [%raw {|App.DNA|}]
 
     type hash = [`DNA] HashString.t
     let hash : hash = (HashString.create hash :> hash)
@@ -146,16 +147,15 @@ module App = struct
   (** Holochain's Agent related constants *)
   module Agent = struct
 
-    external hash : string =
-      "Hash" [@@bs.module "App.Agent"] [@@bs.val]
+    let hash : string = [%raw {|App.Agent.Hash|}]
 
     type hash = [`Agent] HashString.t
- 
+
     (** Holds your peer's identity info on the DHT. This is the hash for the
      * second entry (identity info) on your chain. **)
     let hash : hash = (HashString.create hash :> hash)
 
-    external topHash : string = "TopHash" [@@bs.module "App.Agent"] [@@bs.val]
+    let topHash : string = [%raw {|App.Agent.TopHash|}]
 
     (** Holds the most recent agent indentity entry that has been committed to
      * the chain. To start with its value is equivalent to App.Agent.Hash after
@@ -163,7 +163,7 @@ module App = struct
      * agent entry. *)
     let topHash : [`Top] HashString.t = HashString.create topHash
 
-    external string : string = "String" [@@bs.module "App.Agent"] [@@bs.val]
+    let string : string = [%raw {|App.Agent.String|}]
 
     (** Holds the identity string used to initialize the holochain software
      * with hcadmin init If you used JSON to embed multiple properties (such as
@@ -175,7 +175,7 @@ module App = struct
 
   (** Holochain's Key related constants *)
   module Key = struct
-    external hash : string = "Hash" [@@bs.module "App.DNA"] [@@bs.val]
+    let hash : string = [%raw {|App.DNA.Hash|}]
 
    (* Holds the hash of your public key. This is your node address on the DHT.
     * It can be used for node-to-node messaging with send and receive

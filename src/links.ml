@@ -7,12 +7,17 @@ module Link = struct
   type ('base, 'link) t = {
     base : 'base HashString.t [@bs.as "Base"];
     link : 'link HashString.t [@bs.as "Link"];
-    tag : string option [@bs.as "Tag"];
-    linkAction : System.LinkAction.t option [@bs.as "LinkAction"]
+    tag : string Js.Null.t [@bs.as "Tag"];
+    linkAction : System.LinkAction.t Js.Null.t [@bs.as "LinkAction"]
   } [@@bs.deriving abstract]
 
   let t ?tag ?linkAction ~base ~link () =
-    t ~tag ~linkAction ~base ~link
+    t ~tag:(Js.Null.fromOption tag)
+      ~linkAction:(Js.Null.fromOption linkAction)  ~base ~link
+
+  let linkAction t = linkAction t |> Js.Null.toOption
+  let tag t = tag t |> Js.Null.toOption
+
 end
 
 
@@ -26,7 +31,7 @@ let t links : t =
   (Belt_Array.map links
     (fun (l:('a, 'b) Link.t) ->
       Link.t
-        (* TODO figure out better wayt to do this *)
+        (* TODO figure out better way to do this *)
        ~base:(Link.base l :> [`Any] HashString.t)
        ~link:(Link.link l :> [`Any] HashString.t)
        ?tag:(Link.tag l)

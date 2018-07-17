@@ -79,7 +79,7 @@ type packed =
   {hash:string;
    entryType:string;
    entry:Js.Json.t;
-   source:App.Agent.hash
+   source:App0.Agent.hash
   }
 
 let get
@@ -112,7 +112,7 @@ let get
     entries
 
 type 'entry unpacked =
-  {entry:'entry;source:App.Agent.hash;hash:'entry HashString.t}
+  {entry:'entry;source:App0.Agent.hash;hash:'entry HashString.t}
 
 let unpack
     (type entry)

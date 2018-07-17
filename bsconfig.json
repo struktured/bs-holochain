@@ -7,7 +7,7 @@
     "public" : "all"
   },
   "package-specs": {
-    "module": "commonjs",
+    "module": "es6",
     "in-source": false
   },
   "suffix": ".bs.js",

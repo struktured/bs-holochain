@@ -16,7 +16,7 @@ sig
       It may use other native holochain functions to accomplish, including
       mutating operations.
   *)
-  val receive : App.Agent.hash -> input -> output
+  val receive : App0.Agent.hash -> input -> output
 end
 
 (** A sender and receiver pair. The [input] and [output] types are fixed
@@ -24,7 +24,7 @@ end
 *)
 module type S = sig
   include S0
-  val send : App.Agent.hash -> input -> output
+  val send : App0.Agent.hash -> input -> output
 end
 
 (** Makes a sender and receiver pair given the receiver callback module. *)
@@ -32,7 +32,7 @@ module Make (T : S0) :
   S with type input = T.input with type output = T.output =
 struct
   include T
-  external send : App.Agent.hash -> input -> output = "" [@@bs.val]
+  external send : App0.Agent.hash -> input -> output = "" [@@bs.val]
   let send = send
 end
 

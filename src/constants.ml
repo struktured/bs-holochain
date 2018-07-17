@@ -126,8 +126,8 @@ module System = struct
 
 end
 
-(** Holochain application constants *)
-module App = struct
+(** Holochain local application constants *)
+module App0 = struct
 
   (** Holds the Name of this Holochain from the DNA. *)
   let name : string = [%raw {|App.Name|}]

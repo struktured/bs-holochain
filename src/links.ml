@@ -57,7 +57,7 @@ struct
     statusMask : System.Status.t [@bs.as "StatusMask"]
   } [@@bs.deriving abstract]
 
-  let defaultLinkOptions =
+  let default =
     t ~load:false ~statusMask:System.Status.live
 end
 
@@ -65,7 +65,7 @@ end
 external get :
   base:'entry HashString.t ->
   tag:string ->
-  options:Options.t option ->
+  options:Options.t Js.Null.t ->
   Js.Json.t array =
   "getLinks" [@@bs.val]
 
@@ -78,7 +78,7 @@ external get :
  * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
  * links with a certain status. Default is to return only Live links. You can
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
-let get ?(tag="") ?options = get ~tag ~options
+let get ?(tag="") ?options = get ~tag ~options:(Js.Null.fromOption options)
 
 type packed =
   {hash:string;
@@ -100,16 +100,16 @@ let get
        | Some dict ->
          let hash =
            Belt_Option.getExn (Js.Dict.get dict "Hash") |>
-           Js.Json.stringify in
-         (match Belt_Option.map
-                  (Js.Dict.get dict "EntryType") Js.Json.stringify with
+           Js.Json.decodeString |> Belt_Option.getExn in
+         (match Belt_Option.flatMap
+                  (Js.Dict.get dict "EntryType") Js.Json.decodeString with
          | None -> `Hash hash
          | Some entryType ->
            let entry = Belt_Option.getExn
                (Js.Dict.get dict "Entry") in
            let source =
              Belt_Option.getExn (Js.Dict.get dict "Source") |>
-             Js.Json.stringify |>
+             Js.Json.decodeString |> Belt_Option.getExn |>
              HashString.create in
            `Packed {hash; entryType; entry; source}
          )
@@ -130,7 +130,7 @@ let unpack
         match entryType = E.name with
         | true -> Some {source;entry=E.convertType entry;
                         hash=E.hashOfString hash}
-        | false -> None
+        | false -> Js.log3 "unpack: " entryType E.name; None
     )
 
 

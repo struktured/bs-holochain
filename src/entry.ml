@@ -13,6 +13,9 @@ module GetOptions = struct
         ?(local=false)
         ?(bundle=false) () =
     t ~statusMask ~getMask ~local ~bundle
+
+  let default =
+    t ()
 end
 (**
    {1} Entry definitions and functors.
@@ -41,24 +44,26 @@ end
 module Make ( E : S0 ) : S with type t = E.t = struct
   include E
   external convertType : Js.Json.t -> t = "%identity"
-  external get : t HashString.t -> options:GetOptions.t option -> t option = ""
-    [@@bs.val] [@@bs.return nullable]
+  external get : t HashString.t -> options:GetOptions.t -> t Js.Null.t = ""
+    [@@bs.val]
   external makeHash : entryType:string -> t -> t HashString.t = "" [@@bs.val]
   external commit : entryType:string -> t -> t HashString.t = "" [@@bs.val]
   external update :
     entryType:string -> t -> t HashString.t -> t HashString.t = "" [@@bs.val]
   external remove :
-    t HashString.t -> message:string option -> t HashString.t = "" [@@bs.val]
+    t HashString.t -> message:string Js.Null.t -> t HashString.t = "" [@@bs.val]
   external toJson : t -> Js.Json.t = "%identity"
 
   let makeHash = makeHash ~entryType:name
   let convertType = convertType
-  let get ?options hashString = get hashString ~options
+  let get ?options hashString = get hashString
+      ~options:(Belt_Option.getWithDefault options GetOptions.default) |>
+                                Js.Null.toOption
   let commit = commit ~entryType:E.name
   let update entry oldHash =
     update ~entryType:E.name entry oldHash
   let remove ?message h =
-    remove h ~message
+    remove h ~message:(Js.Null.fromOption message)
   let hashOfString (s:string) : t HashString.t =
     HashString.create s
 end

@@ -138,7 +138,7 @@ module App0 = struct
     (** Holds the unique identifier of this Holochain's DNA.
        Nodes must run the same DNA to be on the same Holochain.
      * *)
-    let hash : string = [%raw {|App.DNA|}]
+    let hash : string = [%raw {|App.DNA.Hash|}]
 
     type hash = [`DNA] HashString.t
     let hash : hash = (HashString.create hash :> hash)
@@ -175,7 +175,7 @@ module App0 = struct
 
   (** Holochain's Key related constants *)
   module Key = struct
-    let hash : string = [%raw {|App.DNA.Hash|}]
+    let hash : string = [%raw {|App.Key.Hash|}]
 
    (* Holds the hash of your public key. This is your node address on the DHT.
     * It can be used for node-to-node messaging with send and receive

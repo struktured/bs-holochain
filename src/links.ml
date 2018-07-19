@@ -61,11 +61,22 @@ struct
     t ~load:false ~statusMask:System.Status.live
 end
 
-
 external get :
   base:'entry HashString.t ->
+  Js.Json.t array =
+  "getLinks" [@@bs.val]
+
+external getTag :
+  base:'entry HashString.t ->
   tag:string ->
-  options:Options.t Js.Null.t ->
+  Js.Json.t array =
+  "getLinks" [@@bs.val]
+
+
+external getTagOpt :
+  base:'entry HashString.t ->
+  tag:string Js.Null.t ->
+  options:Options.t ->
   Js.Json.t array =
   "getLinks" [@@bs.val]
 
@@ -78,7 +89,15 @@ external get :
  * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
  * links with a certain status. Default is to return only Live links. You can
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
-let get ?(tag="") ?options = get ~tag ~options:(Js.Null.fromOption options)
+let get ?tag ?options ~base =
+  match options,tag with
+  | Some options, tag ->
+    getTagOpt ~tag:(Js.Null.fromOption tag)
+        ~options ~base
+  | None, Some tag ->
+    getTag ~tag ~base
+  | None, None ->
+    get ~base
 
 type packed =
   {hash:string;
@@ -89,7 +108,7 @@ type packed =
 
 let get
     ?(tag:string option)
-    ?(options:Options.t option) ~base =
+    ?(options:Options.t option) base =
   let entries = get ?tag ?options ~base in
   Array.map
     (fun entryInfo ->

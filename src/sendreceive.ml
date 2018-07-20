@@ -33,7 +33,6 @@ module Make (T : S0) :
 struct
   include T
   external send : App0.Agent.hash -> input -> output = "" [@@bs.val]
-  let send = send
 end
 
 (** A minimal [SendReceive.S] implementation which accepts unit and returns unit. *)

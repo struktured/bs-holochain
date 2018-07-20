@@ -54,7 +54,7 @@ struct
 
   module type S = sig
     include S0
-    include Sendreceive.S
+    include Sendreceive.S0
     include Callbacks.REQUIRED
   end
 
@@ -64,7 +64,7 @@ struct
     S with type input = SR.input and type output = SR.output =
   struct
     include Z
-    include Sendreceive.Make(SR)
+    include SR
 
     let moduleOfEntryType (entryType:string) =
       Belt_Map.String.get (!entries) entryType

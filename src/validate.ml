@@ -5,6 +5,7 @@ module type S =
   (** The entry type being validated *)
   type t
   val validateCommit :
+    header:Js.Json.t ->
     package:Js.Json.t ->
     sources: string array ->
     t ->
@@ -47,6 +48,7 @@ end
 class type ['entry] validate =
   object
   method validateCommit :
+    header:Js.Json.t ->
     package:Js.Json.t ->
     sources: string array ->
     'entry ->
@@ -88,6 +90,7 @@ end
 class ['entry] acceptAll : ['entry] validate =
   object
   method validateCommit
+    ~header:_
     ~package:_
     ~sources:_
     _entry = true
@@ -125,16 +128,107 @@ class ['entry] acceptAll : ['entry] validate =
   method validateLinkPkg () = Js.Json.null
 end
 
+class ['entry] trace : ['entry] validate =
+  object
+  method validateCommit
+    ~header
+    ~package
+    ~sources
+    entry =
+    Native.debug
+      ("bs-holochain: validateCommit",
+       header,
+       entry,
+       package,
+       sources
+      );
+    true
+
+  method validatePut
+    ~header
+    ~package
+    ~sources
+    entry =
+    Native.debug
+      ("bs-holochain: validatePut",
+       entry,
+       header,
+       package,
+       sources
+      );
+    true
+
+  method validateMod
+    ~header
+    ~replaces
+    ~package
+    ~sources
+    entry =
+  Native.debug
+      ("bs-holochain: validateMod",
+       entry,
+       header,
+       replaces,
+       package,
+       sources
+      );
+  true
+
+  method validateDel
+    ~hash
+    ~package
+    ~sources =
+    Native.debug
+      ("bs-holochain: validateDel",
+       hash,
+       package,
+       sources
+      );
+     true
+
+  method validateLink
+    ~hash
+    ~package
+    ~sources
+    ~links =
+    Native.debug
+      ("bs-holochain: validateLink",
+       hash,
+       package,
+       sources,
+       links
+      );
+     true
+  method validatePutPkg () =
+    Native.debug
+      ("bs-holochain: validatePutPkg");
+    Js.Json.null
+  method validateModPkg () =
+    Native.debug
+      ("bs-holochain: validateModPkg");
+    Js.Json.null
+  method validateDelPkg () =
+    Native.debug
+      ("bs-holochain: validateDelPkg");
+    Js.Json.null
+  method validateLinkPkg () =
+    Native.debug
+      ("bs-holochain: validateLinkPkg");
+    Js.Json.null
+end
+
+
 let of_object (type entry) (obj:entry validate) =
 let module V : S with type t = entry =
 struct
   type t = entry
 
   let validateCommit
+    ~header
     ~package
     ~sources
     entry =
-    obj#validateCommit ~package ~sources entry
+    obj#validateCommit ~header ~package ~sources entry
 
   let validatePut
     ~header
@@ -170,6 +264,13 @@ struct
   let validateLinkPkg () = obj#validateLinkPkg ()
 end in
 (module V : S with type t = entry)
+
+
+module Trace(E:Entry.S0) : S with type t = E.t =
+  struct
+    let m = of_object (new trace)
+    include (val m : S with type t = E.t)
+  end
 
 module Accept_all(E:Entry.S0) : S with type t = E.t =
 struct

@@ -19,7 +19,7 @@ module type REQUIRED = sig
    * entry types. For more background, read the Validation Functions section.
    * *)
   val validateCommit : entryType:string -> entry:Js.Json.t ->
-    package:Js.Json.t -> sources:string array -> bool
+    header:Js.Json.t -> package:Js.Json.t -> sources:string array -> bool
 
   (** This function gets called when an entry is about to be committed to the
    * DHT on any node. It is very likely that this validation routine should
@@ -63,7 +63,7 @@ module type REQUIRED = sig
    * as usual when that linking entry is committed to the source chain. For
    * more background, read the Validation Functions section. *)
   val validateLink:
-    entryType:string (* enum? *) ->
+    entryType:string ->
     hash:string ->
     links:Js.Json.t array ->
     package:Js.Json.t ->

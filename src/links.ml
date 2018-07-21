@@ -144,12 +144,15 @@ let unpack
     links : entry unpacked array =
   Belt_Array.keepMap links
     (function
-      | `Hash (_hash:string) -> None
+      | `Hash (_hash:string) ->
+        Js.log "unpack: just hash"; None
       | `Packed {hash;entryType;entry;source} ->
         match entryType = E.name with
-        | true -> Some {source;entry=E.convertType entry;
+        | true -> 
+          Js.log2 "unpack match:" entryType;
+          Some {source;entry=E.convertType entry;
                         hash=E.hashOfString hash}
-        | false -> Js.log3 "unpack: " entryType E.name; None
+        | false -> Js.log3 "unpack not match: " entryType E.name; None
     )
 
 

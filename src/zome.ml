@@ -77,10 +77,11 @@ struct
     module Callback : Callbacks.REQUIRED = struct
       include G
 
-      let validateCommit ~entryType ~entry ~package ~sources =
+      let validateCommit ~entryType ~entry ~header ~package ~sources =
         let m = moduleOfEntryTypeExn entryType in
         let module H = (val m : HANDLER) in
         H.validateCommit
+          ~header
           ~package
           ~sources
           (H.convertType (entry : Js.Json.t))

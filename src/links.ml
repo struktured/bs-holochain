@@ -7,16 +7,13 @@ module Link = struct
   type ('base, 'link) t = {
     base : 'base HashString.t [@bs.as "Base"];
     link : 'link HashString.t [@bs.as "Link"];
-    tag : string Js.Null.t [@bs.as "Tag"];
-    linkAction : System.LinkAction.t Js.Null.t [@bs.as "LinkAction"]
+    tag : string [@bs.as "Tag"] [@bs.optional];
+    linkAction : System.LinkAction.t [@bs.as "LinkAction"] [@bs.optional]
   } [@@bs.deriving abstract]
 
-  let t ?tag ?linkAction ~base ~link () =
-    t ~tag:(Js.Null.fromOption tag)
-      ~linkAction:(Js.Null.fromOption linkAction)  ~base ~link
+  let tag t = tagGet t
 
-  let linkAction t = linkActionGet t |> Js.Null.toOption
-  let tag t = tagGet t |> Js.Null.toOption
+  let linkAction t = linkActionGet t
 
 end
 
@@ -53,15 +50,15 @@ let t links : t =
 module Options =
 struct
   type t = {
-    load : bool [@bs.as "Load"];
-    statusMask : System.Status.t [@bs.as "StatusMask"]
+    load : bool [@bs.as "Load"] [@bs.optional];
+    statusMask : System.Status.t [@bs.as "StatusMask"] [@bs.optional]
   } [@@bs.deriving abstract]
 
   let default =
     t ~load:false ~statusMask:System.Status.live
 end
 
-external get :
+external links :
   base:'entry HashString.t ->
   Js.Json.t array =
   "getLinks" [@@bs.val]
@@ -89,7 +86,7 @@ external getTagOpt :
  * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
  * links with a certain status. Default is to return only Live links. You can
  * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
-let get ?tag ?options ~base =
+let links ?tag ?options ~base =
   match options,tag with
   | Some options, tag ->
     getTagOpt ~tag:(Js.Null.fromOption tag)
@@ -97,7 +94,7 @@ let get ?tag ?options ~base =
   | None, Some tag ->
     getTag ~tag ~base
   | None, None ->
-    get ~base
+    links ~base
 
 type packed =
   {hash:string;
@@ -106,10 +103,10 @@ type packed =
    source:App0.Agent.hash
   }
 
-let get
+let links
     ?(tag:string option)
     ?(options:Options.t option) base =
-  let entries = get ?tag ?options ~base in
+  let entries = links ?tag ?options ~base in
   Array.map
     (fun entryInfo ->
        match Js.Json.decodeObject entryInfo with

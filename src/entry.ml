@@ -2,18 +2,11 @@ open Constants
 
 module GetOptions = struct
   type t = {
-    statusMask : System.Status.t [@bs.as "StatusMask"];
-    getMask : System.GetMask.t [@bs.as "GetMask"];
-    local : bool [@bs.as "Local"];
-    bundle : bool [@bs.as "Bundle"];
+    statusMask : System.Status.t [@bs.as "StatusMask"] [@bs.optional];
+    getMask : System.GetMask.t [@bs.as "GetMask"] [@bs.optional];
+    local : bool [@bs.as "Local"] [@bs.optional];
+    bundle : bool [@bs.as "Bundle"] [@bs.optional];
   } [@@bs.deriving abstract]
-
-  let t ?(statusMask=System.Status.live)
-        ?(getMask=System.GetMask.default)
-        ?(local=false)
-        ?(bundle=false) () =
-    t ~statusMask ~getMask ~local ~bundle
-
   let default =
     t ()
 end
@@ -44,7 +37,9 @@ end
 module Make ( E : S0 ) : S with type t = E.t = struct
   include E
   external convertType : Js.Json.t -> t = "%identity"
-  external get : t HashString.t -> options:GetOptions.t -> t Js.Null.t = ""
+  external getOpt : t HashString.t -> GetOptions.t -> Js.Json.t = "get"
+    [@@bs.val]
+  external get : t HashString.t -> Js.Json.t = ""
     [@@bs.val]
   external makeHash : entryType:string -> t -> t HashString.t = "" [@@bs.val]
   external commit : entryType:string -> t -> t HashString.t = "" [@@bs.val]
@@ -54,11 +49,35 @@ module Make ( E : S0 ) : S with type t = E.t = struct
     t HashString.t -> message:string Js.Null.t -> t HashString.t = "" [@@bs.val]
   external toJson : t -> Js.Json.t = "%identity"
 
-  let makeHash = makeHash ~entryType:name
+  let makeHash t =
+    Native.debug ("bs-holochain", "makeHash", name, t);
+    makeHash ~entryType:name t
+
   let convertType = convertType
-  let get ?options hashString = get hashString
-      ~options:(Belt_Option.getWithDefault options GetOptions.default) |>
-                                Js.Null.toOption
+  let get ?options hashString =
+    let json = match options with
+      | None ->
+        get hashString
+      | Some options ->
+        getOpt hashString options in
+    match Js.Json.decodeString json with
+    | Some s ->
+      (match (s :> string) = System.hashNotFound with
+       | true ->
+         Native.debug
+           ("bs-holochain: get", hashString, " hashNotFound, returning none");
+         None
+       | false ->
+         Some (convertType json)
+      )
+    | None ->
+      match Js.Json.test json Js.Json.Null with
+      | true ->
+        None
+      | false ->
+        Some (convertType json)
+
+
   let commit = commit ~entryType:E.name
   let update entry oldHash =
     update ~entryType:E.name entry oldHash

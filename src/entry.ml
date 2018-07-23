@@ -109,4 +109,6 @@ let hashOfString (type t) (module E : S0 with type t = t) =
   Entry.hashOfString
 
 
-
+let update (type t) (module E: S0 with type t = t) =
+  let module Entry = Make(E) in
+  Entry.update

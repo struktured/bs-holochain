@@ -1,6 +1,7 @@
+open Printf
 (**
  * A minimally defined Zome is just a named entity.
- *)
+*)
 module type S0 = Named.S
 
 
@@ -71,7 +72,9 @@ struct
 
     let moduleOfEntryTypeExn entryType =
       match moduleOfEntryType entryType with
-      | None -> failwith "no module for entry type"
+      | None ->
+        failwith
+          (sprintf "no module for entry type: %s" entryType)
       | Some m -> m
 
     module Callback : Callbacks.REQUIRED = struct

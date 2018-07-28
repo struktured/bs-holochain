@@ -48,9 +48,9 @@ module MyData = struct
   type t = {data:string} [@@bs.deriving abstract]
 end
 
-(* Add the MyData entry type to the zome with validation function
-   thats simply accepts any input (eg. returns true or Null,
-   as the callback would require.
+(* Add the MyData entry type to the zome with validation functions
+   that simply accepts any input (eg. returns true or Null,
+   as the callback would require).
 
    The return moduled is an [Entry.S] signature, giving the developer
    specialized commit, update, and get functions over for the MyData entry.
@@ -58,7 +58,16 @@ end
 module MyDataEntry = Builder.Entry0(MyData)(Validate.Accept_all(MyData))
 
 
-(* This finalizes the zome and includes the validation functions so they now server
+(** Define input type to a zome function as a zome hash string of [MyData.t] *)
+type args = MyData.t HashString.t
+
+(* Define a public zome function (this was defined in dna.json as
+   function named "dataExists")
+*)
+let dataExists args =
+  match MyDataEntry.get args with None -> false | Some _ -> true
+
+(* This finalizes the zome and includes the validation functions so they now serve
    as javascript call back functions.
 
    Since a zome requires a genesis function and possibly a receiver function, so 

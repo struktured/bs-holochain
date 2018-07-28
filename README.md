@@ -78,4 +78,4 @@ let dataExists args =
 include Builder.Build(Genesis.Success)(SendReceive.Unit)
 ```
 
-See [NewCraigsLists, ported to OCaml](https://github.com/struktured/NewCraigsLists) for a more complex implementation.
+See [NewCraigsLists, ported to OCaml](https://github.com/struktured/NewCraigsList) for a more complex implementation.

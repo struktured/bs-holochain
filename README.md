@@ -34,7 +34,7 @@ accumulate all the entry definitions.
 
 ```OCaml
 (** user zome example *)
-open HC
+open Hc
 
 (* Instantiate a new zome builder with name equal to "myzome" *)
 module Builder = Zome.Builder(struct let name = "myzome" end)

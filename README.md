@@ -6,7 +6,7 @@ holochain application in pure Ocaml/Reason.
 
 This project requires npm and bucklescript 4.0.1. To produce a complex library
 you also need to unify the json into one big zome file. Rollup and babel are typical
-choies.
+choices.
 
 # Build
 ```

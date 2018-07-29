@@ -56,7 +56,7 @@ end
    as the callback would require).
 
    The return moduled is an [Entry.S] signature, giving the developer
-   specialized commit, update, and get functions over for the MyData entry.
+   specialized commit, update, and get functions over the MyData entry.
 *)
 module MyDataEntry = Builder.Entry0(MyData)(Validate.Accept_all(MyData))
 

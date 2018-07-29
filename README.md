@@ -82,7 +82,7 @@ let addData data =
 
    Since a zome requires a genesis function and possibly a receiver function, so 
    does the below functor. In this example builtin modules are used for both. The
-   [Genesis.Success] module just returns the true and does no initialize. Similarly,
+   [Genesis.Success] module just returns true and does no initialization. Similarly,
    the send and receive functions operate on the unit value.
 *)
 include Builder.Build(Genesis.Success)(SendReceive.Unit)

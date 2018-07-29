@@ -88,4 +88,17 @@ let addData data =
 include Builder.Build(Genesis.Success)(SendReceive.Unit)
 ```
 
-See [NewCraigsList, ported to OCaml](https://github.com/struktured/NewCraigsList) for a more complex implementation.
+# Examples
+
+See [NewCraigsList, ported to OCaml](https://github.com/struktured/NewCraigsList) 
+for a more complex implementation.
+
+# Notes
+
+This library binds to the javascript api running on a *Go* server via Go's
+Otto javascript interpreter. The holochain team is porting their stack from
+Go to Rust/Web Assembly.
+
+Thus, this binding is subject to drastic change in the future. My hope is that
+the OCaml/Reason abstraction boundary will ease migration to the new javascript api
+(or web assembly directly).

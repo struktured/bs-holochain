@@ -1,5 +1,7 @@
-Holochain API bindings via bucklescript. This library allows you to write a
-holochain application in pure Ocaml/Reason.
+[Holochain API](https://developer.holochain.org/) bindings via
+[Bucklescript](https://bucklescript.github.io). This library allows
+you to write a [holochain](https://holochain.org) application in pure
+Ocaml/Reason.
 
 
 # Dependencies

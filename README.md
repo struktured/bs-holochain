@@ -26,6 +26,9 @@ In your dependent project run
 ## Define your zomes as usual
 
 Create a dna.json and schema files as you would for any standard holochain app.
+See their [DNA](https://developer.holochain.org/DNA) reference documentation
+for further details on this step.
+
 
 ## Implement your zomes
 
@@ -33,7 +36,7 @@ For each zome you define a module that instantiates a builder style functor to
 accumulate all the entry definitions.
 
 ```OCaml
-(** user zome example *)
+(** Zome example *)
 open Hc
 
 (* Instantiate a new zome builder with name equal to "myzome" *)
@@ -67,6 +70,13 @@ type args = MyData.t HashString.t
 let dataExists args =
   match MyDataEntry.get args with None -> false | Some _ -> true
 
+
+(* Define a public zome function to add data to the DHT
+  (this was defined in dna.json as function named "addData")
+*)
+let addData data =
+  MyDataEntry.commit (MyData.t ~data)
+
 (* This finalizes the zome and includes the validation functions so they now serve
    as javascript call back functions.
 
@@ -78,4 +88,4 @@ let dataExists args =
 include Builder.Build(Genesis.Success)(SendReceive.Unit)
 ```
 
-See [NewCraigsLists, ported to OCaml](https://github.com/struktured/NewCraigsList) for a more complex implementation.
+See [NewCraigsList, ported to OCaml](https://github.com/struktured/NewCraigsList) for a more complex implementation.

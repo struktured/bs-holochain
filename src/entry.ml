@@ -20,23 +20,33 @@ sig
   type t
 end
 
-module type S = sig
+module type E0 = sig
   include S0
-  val convertType : Js.Json.t -> t
+  val ofJson : Js.Json.t -> t
+  val toJson : t -> Js.Json.t
+end
+
+
+module type S = sig
+  include E0
   val get : ?options:GetOptions.t -> t HashString.t -> t option
   val commit : t -> t HashString.t
   val makeHash : t -> t HashString.t
   val hashOfString : string -> t HashString.t
   val update : t -> t HashString.t -> t HashString.t
   val remove : ?message:string -> t HashString.t -> t HashString.t
-
-  (** [toJson t] converts the entry [t] to a json structure. *)
-  val toJson : t -> Js.Json.t
 end
 
-module Make ( E : S0 ) : S with type t = E.t = struct
+
+module Identity(E:S0) : E0 with type t = E.t =
+struct
   include E
-  external convertType : Js.Json.t -> t = "%identity"
+  external ofJson : Js.Json.t -> t = "%identity"
+  external toJson : t -> Js.Json.t = "%identity"
+end
+
+module Make_json ( E : E0 ) : S with type t = E.t = struct
+  include E
   external getOpt : t HashString.t -> GetOptions.t -> Js.Json.t = "get"
     [@@bs.val]
   external get : t HashString.t -> Js.Json.t = ""
@@ -47,13 +57,12 @@ module Make ( E : S0 ) : S with type t = E.t = struct
     entryType:string -> t -> t HashString.t -> t HashString.t = "" [@@bs.val]
   external remove :
     t HashString.t -> message:string Js.Null.t -> t HashString.t = "" [@@bs.val]
-  external toJson : t -> Js.Json.t = "%identity"
 
   let makeHash t =
     Native.debug ("bs-holochain", "makeHash", name, t);
     makeHash ~entryType:name t
 
-  let convertType = convertType
+  let ofJson = ofJson
   let get ?options hashString =
     let json = match options with
       | None ->
@@ -68,14 +77,14 @@ module Make ( E : S0 ) : S with type t = E.t = struct
            ("bs-holochain: get", hashString, " hashNotFound, returning none");
          None
        | false ->
-         Some (convertType json)
+         Some (ofJson json)
       )
     | None ->
       match Js.Json.test json Js.Json.Null with
       | true ->
         None
       | false ->
-        Some (convertType json)
+        Some (ofJson json)
 
 
   let commit = commit ~entryType:E.name
@@ -87,6 +96,28 @@ module Make ( E : S0 ) : S with type t = E.t = struct
     HashString.create s
 end
 
+(** An extension of an entry type that requires
+ *  serializations from @glennsl/bs-json. *)
+module type E_BS =
+sig
+  include S0
+  val write_t : t -> Js.Json.t
+  val read_t : Js.Json.t -> t
+end
+
+module Make_bs(E : E_BS) =
+struct
+    include Make_json(
+      struct
+        include E
+        let ofJson = read_t
+        let toJson = write_t
+      end
+      )
+end
+
+module Make(E: S0) :
+  S with type t = E.t = Make_json(Identity(E))
 
 (** {1} Functorless entry functions, all which require
     first class entry modules of type [S0].

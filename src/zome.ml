@@ -87,7 +87,7 @@ struct
           ~header
           ~package
           ~sources
-          (H.convertType (entry : Js.Json.t))
+          (H.ofJson (entry : Js.Json.t))
 
       let validatePut ~entryType ~entry ~header ~package ~sources =
         let m = moduleOfEntryTypeExn entryType in
@@ -96,7 +96,7 @@ struct
           ~header
           ~package
           ~sources
-          (H.convertType entry)
+          (H.ofJson entry)
 
       let validateMod ~entryType ~entry
           ~header ~(replaces:string) ~package ~sources =
@@ -108,7 +108,7 @@ struct
           ~replaces
           ~package
           ~sources
-          (H.convertType entry)
+          (H.ofJson entry)
 
       let validateDel ~entryType
           ~(hash:string) ~package ~sources =

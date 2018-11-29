@@ -147,7 +147,7 @@ let unpack
         match entryType = E.name with
         | true -> 
           Js.log2 "unpack match:" entryType;
-          Some {source;entry=E.convertType entry;
+          Some {source;entry=E.ofJson entry;
                         hash=E.hashOfString hash}
         | false -> Js.log3 "unpack not match: " entryType E.name; None
     )

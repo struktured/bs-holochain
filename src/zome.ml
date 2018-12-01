@@ -28,6 +28,20 @@ struct
           (module Handler : HANDLER)
   end
 
+  module EntryBs
+      (E: Entry.E_BS)
+      (V : Validate.S with type t = E.t) :
+    Entry.S with type t = E.t = struct
+    module E = Entry.Make_bs(E)
+    module H : HANDLER with type t = E.t =
+    struct
+      include (E : Entry.S with type t = E.t)
+      include (V : Validate.S with type t := t)
+    end
+    include Handler(H)
+  end
+
+
   module Entry0
       (E0 : Entry.S0)
       (V : Validate.S with type t = E0.t) :

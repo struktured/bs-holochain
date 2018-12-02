@@ -2,3 +2,4 @@
 include Native
 include Callbacks
 include Constants
+module HashString = HashString

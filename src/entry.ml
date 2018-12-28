@@ -56,7 +56,8 @@ module Make_json ( E : E0 ) : S with type t = E.t = struct
   external update :
     entryType:string -> t -> t HashString.t -> t HashString.t = "" [@@bs.val]
   external remove :
-    t HashString.t -> message:string Js.Null.t -> t HashString.t = "" [@@bs.val]
+    t HashString.t -> message:string Js.Null.t ->
+    t HashString.t = "" [@@bs.val]
 
   let makeHash t =
     Native.debug ("bs-holochain", "makeHash", name, t);
@@ -138,7 +139,6 @@ let commit (type t) (module E : S0 with type t = t) =
 let hashOfString (type t) (module E : S0 with type t = t) =
   let module Entry = Make(E) in
   Entry.hashOfString
-
 
 let update (type t) (module E: S0 with type t = t) =
   let module Entry = Make(E) in

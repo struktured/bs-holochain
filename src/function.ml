@@ -29,6 +29,23 @@ module Make (T : S0) :
   let call args = call ~zomeName:T.Zome.name ~functionName:T.name args
 end
 
+module type T_BS =
+sig
+  include S0
+  val write_input : input -> Js.Json.t
+  val read_output : Js.Json.t -> output
+end
+
+module Make_bs(T : T_BS) :
+  S with type input = T.input with type output = T.output = struct
+  include T
+  external call :
+    zomeName:string -> functionName:string -> Js.Json.t -> Js.Json.t = "" [@@bs.val]
+  let call args =
+    call ~zomeName:T.Zome.name ~functionName:T.name (write_input args) |>
+    read_output
+end
+
 (** [call (module T) args] calls function [T] with [args] in the zome as
     described by [T.Zome].
 *)

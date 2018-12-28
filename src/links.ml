@@ -8,7 +8,8 @@ module Link = struct
     base : 'base HashString.t [@bs.as "Base"];
     link : 'link HashString.t [@bs.as "Link"];
     tag : string [@bs.as "Tag"] [@bs.optional];
-    linkAction : System.LinkAction.t [@bs.as "LinkAction"] [@bs.optional]
+    linkAction : System.LinkAction.t
+        [@bs.as "LinkAction"] [@bs.optional]
   } [@@bs.deriving abstract]
 
   let tag t = tagGet t
@@ -78,14 +79,14 @@ external getTagOpt :
   "getLinks" [@@bs.val]
 
 (** Retrieves a list of links tagged as tag on base from the DHT. If tag is an
- * empty string it will return all the links on the baseand the list will also
- * include the Tag property on entries. With options as {Load: false} (which is
- * the default) returns a list of the form [{Hash:"QmY..."},..] With options as
- * {Load: true} it will get the entry values of the links and return a list of
- * the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value
- * here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
- * links with a certain status. Default is to return only Live links. You can
- * use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
+ empty string it will return all the links on the baseand the list will also
+ include the Tag property on entries. With options as {Load: false} (which is
+ the default) returns a list of the form [{Hash:"QmY..."},..] With options as
+ {Load: true} it will get the entry values of the links and return a list of
+ the form [{Hash:"QmY...",EntryType:"<entry-type>",Entry:"<entry value
+ here>",Source:"<source-hash>"},..]}. Use options.StatusMask to return only
+ links with a certain status. Default is to return only Live links. You can
+ use defined constants HC.Status.Live/Deleted/Rejected as the int value. *)
 let links ?tag ?options ~base =
   match options,tag with
   | Some options, tag ->
@@ -145,7 +146,7 @@ let unpack
         Js.log "unpack: just hash"; None
       | `Packed {hash;entryType;entry;source} ->
         match entryType = E.name with
-        | true -> 
+        | true ->
           Js.log2 "unpack match:" entryType;
           Some {source;entry=E.ofJson entry;
                         hash=E.hashOfString hash}

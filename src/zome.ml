@@ -84,8 +84,11 @@ struct
     val name : string
     type input
     type output
+    val local : input -> output
     val write_input : input -> Js.Json.t
     val read_output : Js.Json.t -> output
+    val write_output : output -> Js.Json.t
+    val read_input : Js.Json.t -> input
   end
 
 (** Declare a zome function using [F.name] as
